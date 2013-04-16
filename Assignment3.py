@@ -3,11 +3,10 @@ Created on Apr 11, 2013
 
 @author: Diako Mardanbegi (dima@itu.dk)
 '''
-from numpy import *
 import numpy as np
 from pylab import *
 from scipy import linalg
-import cv2
+import cv2 as cv2
 import cv2.cv as cv
 from SIGBTools import *
 
@@ -287,10 +286,31 @@ DownFace = box[i,j]
 
 
 ''' <000> Here Call the cameraCalibrate2 from the SIGBTools to calibrate the camera and saving the data''' 
+#calibrateCamera()
+#cameraCalibrate2()
+#RecordVideoFromCamera()
+
 ''' <001> Here Load the numpy data files saved by the cameraCalibrate2''' 
+cameraMat  = np.load("data/numpyData/camera_matrix.npy")
+roVectors = np.load("data/numpyData/rotatioVectors.npy")
+transVectors  = np.load("data/numpyData/translationVectors.npy")
+
 ''' <002> Here Define the camera matrix of the first view image (01.png) recorded by the cameraCalibrate2''' 
+print roVectors
+roVectors = cv2.Rodrigues(roVectors)
+print cameraMat
+print roVectors
+print transVectors
+
+print shape(cameraMat)
+print shape(roVectors)
+print shape(transVectors)
+
+hs = hstack((cameraMat, roVectors, transVectors))
+cam = Camera(hs)
+
 ''' <003> Here Load the first view image (01.png) and find the chess pattern and store the 4 corners of the pattern needed for homography estimation''' 
 
 
-
-run(1)
+#run(1)
+# vim: set ts=4:shiftwidth=4:expandtab:
