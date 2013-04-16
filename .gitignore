@@ -1,0 +1,11 @@
+*.png
+*.jpg
+*.pdf
+Images
+numpyData
+Saved*Images
+*.pyc
+*.un~
+*.swp
+.DS_Store
+.idea
