@@ -167,11 +167,22 @@ def update(img):
             
             if TextureMap:
                 ''' <010> Here Do the texture mapping and draw the texture on the faces of the cube'''
-                cv2.imread("data/images3/Left.jpg")
-                box = getCubePoints((0,0,0),2,2)
-                box_cam = camera.project(toHomogenious(box))
-                #making a H between
+                ITop = cv2.imread("data/images3/Top.jpg")
 
+                mTop,nTop,i = shape(ITop)
+                topTexPoints = [[0,0],[0,nTop],[mTop,nTop],[mTop,0]]
+
+                box_cam = np.array(camera.project(toHomogenious(box)))
+                #making a H between texture and side of cube
+                print shape(box_cam)
+                #toppen
+                cv2.circle(img, (int(box_cam[0][0]),int(box_cam[1][0])),15,(0,255,234))
+                cv2.circle(img, (int(box_cam[0][1]),int(box_cam[1][1])),15,(0,255,234))
+                cv2.circle(img, (int(box_cam[0][2]),int(box_cam[1][2])),15,(0,255,234))
+                cv2.circle(img, (int(box_cam[0][3]),int(box_cam[1][3])),15,(0,255,234))
+
+                # topP1 =
+                # H = estimateHomography()
                 # I1=cv2.bitwise_and( Mask,image)
                 # image=cv2.bitwise_or(I1, texture)
                 ''' <012> Here Remove the hidden faces'''  
@@ -189,7 +200,7 @@ def update(img):
 
             if WireFrame:                      
                 ''' <009> Here Project the box into the current camera image and draw the box edges'''
-                box = getCubePoints((0,0,0),2,2)
+                # box = getCubePoints((0,0,0),2,2)
                 box_cam = camera.project(toHomogenious(box))
                 DrawLines(img,box_cam)
     cv2.imshow('Web cam', img)
@@ -331,7 +342,7 @@ global chessSquare_size
     
 ProcessFrame=False
 Undistorting=False   
-WireFrame=False
+WireFrame=True
 ShowText=True
 TextureMap=True
 ProjectPattern=False
