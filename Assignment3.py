@@ -11,6 +11,22 @@ import cv2.cv as cv
 from SIGBTools import *
 
 
+def getCornerCoords(boardImg):
+
+    """
+    :param boardImg:
+    :return: cornercoords and centercoord
+    """
+    patternSize = (9,6)
+    found,corners=cv2.findChessboardCorners(boardImg, patternSize)
+    if(found):
+        (x1,y1) = (corners[0][0][0],corners[0][0][1])
+        (x2,y2) = (corners[7][0][0],corners[7][0][1])
+        (x3,y3) = (corners[45][0][0],corners[45][0][1])
+        (x4,y4) = (corners[53][0][0],corners[53][0][1])
+        return True,[(x4,y4),(x3,y3),(x1,y1),(x2,y2)]
+    else: return False, []
+
 def DrawLines(img, points):
     for i in range(1, 17):                
          x1 = points[0, i - 1]
@@ -19,6 +35,7 @@ def DrawLines(img, points):
          y2 = points[1, i]
          cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)), (255, 0, 0),5) 
     return img
+
 
 def getCubePoints(center, size,chessSquare_size):
 
@@ -62,21 +79,21 @@ def getCubePoints(center, size,chessSquare_size):
 
 
 def update(img):
-    image=copy(img)
 
 
     if Undistorting:  #Use previous stored camera matrix and distortion coefficient to undistort the image
-        ''' <004> Here Undistoret the image''' 
+        distortC = np.load("numpyData/distortionCoefficient.npy")
+        image = cv2.undistort(img, cameraMat, distortC)
     
-    if (ProcessFrame): 
-
-        ''' <005> Here Find the Chess pattern in the current frame'''
-        patternFound=True          
+    if (ProcessFrame):
+        I1grey = cv2.cvtColor(I1, cv2.COLOR_RGB2GRAY)
+        found, I1corners = getCornerCoords(I1grey)
+        patternFound=found
     
         if patternFound ==True:        
             
             ''' <006> Here Define the cameraMatrix P=K[R|t] of the current frame'''
-
+            found,rvecs_new,tvecs_new = GetObjectPos(I1corners,)
         
             if ShowText:
                 ''' <011> Here show the distance between the camera origin and the world origin in the image'''                    
@@ -125,7 +142,7 @@ def printUsage():
     print 'g: project the pattern using the camera matrix (test)'
     print 's: save frame'
     print 'x: do something!'
-    
+
    
 def run(speed): 
     
@@ -286,31 +303,45 @@ DownFace = box[i,j]
 
 
 ''' <000> Here Call the cameraCalibrate2 from the SIGBTools to calibrate the camera and saving the data''' 
-#calibrateCamera()
-#cameraCalibrate2()
-#RecordVideoFromCamera()
+# calibrateCamera()
+# cameraCalibrate2(5,(9,6),2.0,0)
+# RecordVideoFromCamera()
 
 ''' <001> Here Load the numpy data files saved by the cameraCalibrate2''' 
-cameraMat  = np.load("data/numpyData/camera_matrix.npy")
-roVectors = np.load("data/numpyData/rotatioVectors.npy")
-transVectors  = np.load("data/numpyData/translationVectors.npy")
+cameraMat  = np.load("numpyData/camera_matrix.npy")
+roVectors = np.load("numpyData/rotatioVectors.npy")
+transVectors  = np.load("numpyData/translationVectors.npy")
 
 ''' <002> Here Define the camera matrix of the first view image (01.png) recorded by the cameraCalibrate2''' 
-print roVectors
-roVectors = cv2.Rodrigues(roVectors)
-print cameraMat
-print roVectors
-print transVectors
 
-print shape(cameraMat)
-print shape(roVectors)
-print shape(transVectors)
+roVectors = cv2.Rodrigues(np.array(roVectors)[0])[0]
+transVectors = np.array(transVectors)[0]
 
-hs = hstack((cameraMat, roVectors, transVectors))
-cam = Camera(hs)
+# print "rotationvector",roVectors
+# print "transvector",transVectors
+
+
+cam1 = Camera(np.dot(cameraMat, np.hstack((roVectors, transVectors))))
+cam1.factor()
+
+box_cam1 = cam1.project(toHomogenious(box))
+
 
 ''' <003> Here Load the first view image (01.png) and find the chess pattern and store the 4 corners of the pattern needed for homography estimation''' 
+I1 = cv2.imread("01.png")
 
+points = toHomogenious(np.array(np.load("numpyData/obj_points.npy"))[0].T)
+projected_points = cam1.project(points)
+
+for point in projected_points.T:
+   cv2.circle(I1,(int(point[0,0]),int(point[0,1])),5,(255,255,0),2)
+
+cameraMat2 = None;
+
+
+
+cv2.imshow("myss",I1)
+cv2.waitKey(0)
 
 #run(1)
 # vim: set ts=4:shiftwidth=4:expandtab:
