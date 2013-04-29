@@ -199,8 +199,7 @@ def update(img):
 
 
             if ShowText:
-                ''' <011> Here show the distance between the camera origin and the world origin in the image'''                    
-                
+                ''' <011> Here show the distance between the camera origin and the world origin in the image'''
 
                 K,R,T = camera.factor()
                 x,y,z = T
@@ -420,7 +419,9 @@ box = getCubePoints([4, 2.5, 0], 1,chessSquare_size)
 i = array([ [0,0,0,0],[1,1,1,1] ,[2,2,2,2]  ])  # indices for the first dim 
 j = array([ [0,3,2,1],[0,3,2,1] ,[0,3,2,1]  ])  # indices for the second dim            
 TopFace = box[i,j]
-
+print shape(TopFace)
+print tuple(TopFace[0])
+print shape(TopFace[0])
 
 i = array([ [0,0,0,0],[1,1,1,1] ,[2,2,2,2]  ])  # indices for the first dim 
 j = array([ [3,8,7,2],[3,8,7,2] ,[3,8,7,2]  ])  # indices for the second dim            

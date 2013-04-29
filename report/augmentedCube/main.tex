@@ -1,0 +1,31 @@
+\section{Augmented Cube} In this assignment we compare two methods of
+calculating camera views.Both utilize that the camera is already calibrated,
+(See earlier section for info about calibration) but uses different methods for
+calculating the extrinsic parameters.  
+
+\subsection{Method one, using homography}
+This method is the same as in the last assignment, so we'll explain it very
+briefly.  As K is known in our projection matrix K*[R|T] we need to calculate R
+and T.  As we have an existing view and four points within that view, that
+corresponds to four ponts in our current frame. we can calculate a homography
+between the two planes and use that to calculate our existing projection matrix.
+We do that simply by multiplying our existing matrix with the homography. cam2 =
+H * cam1 in the last assignment we also used a homography to transfer the
+extrinsic parameters to a new space.There we estimated the "Z" axis by finding
+the cross product between the "X" and "Y" vectors, finding the orthogonal
+vector. This time, the z axis is already calculated in the first camera, and are
+"transfered" as well with the homography. Our results so far shows that the
+projection of the z axis is not nearly as precise as when we use the second
+method.
+
+\subsection{Method two, direct calculation} The second method also utilizes that
+the kamera matrix is already known. Where method one tracked the chessboard
+patterne in two different views, this method only tracks points in the current
+frame. The other chesboard points are calculated from knowledge about the
+pattern. When we know the starting coordinate, the size of each square and
+number of squares, the points can be calculated precisely from the decided
+origin. cv2.solvePnP is used to estimate a camera position relative to the
+surface.This relation effectively gives us the extrinsic vectors.We convert
+those to 3x3 matrices (Rodrigues), and stack them together. Lastly we take the
+dot product between the resulting matrix and our kamera matrix, ending up with
+our new projection matrix.
