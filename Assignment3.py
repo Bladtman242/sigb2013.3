@@ -390,7 +390,7 @@ DownFace = box[i,j]
 ''' <000> Here Call the cameraCalibrate2 from the SIGBTools to calibrate the camera and saving the data''' 
 # calibrateCamera()
 # cameraCalibrate2(5,(9,6),2.0,0)
-# RecordVideoFromCamera()
+RecordVideoFromCamera()
 
 ''' <001> Here Load the numpy data files saved by the cameraCalibrate2''' 
 cameraMat  = np.load("numpyData/camera_matrix.npy")
@@ -427,5 +427,5 @@ firstView = cv2.imread("01.png")
 
 
 
-run(1)
+#run(1)
 # vim: set ts=4:shiftwidth=4:expandtab:
