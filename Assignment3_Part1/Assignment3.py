@@ -3,30 +3,14 @@ Created on Apr 11, 2013
 
 @author: Diako Mardanbegi (dima@itu.dk)
 '''
+from numpy import *
 import numpy as np
 from pylab import *
 from scipy import linalg
-import cv2 as cv2
+import cv2
 import cv2.cv as cv
 from SIGBTools import *
 
-global cam1, firstView
-
-def getCornerCoords(boardImg):
-
-    """
-    :param boardImg:
-    :return: cornercoords and centercoord
-    """
-    patternSize = (9,6)
-    found,corners=cv2.findChessboardCorners(boardImg, patternSize)
-    if(found):
-        (x1,y1) = (corners[0][0][0],corners[0][0][1])
-        (x2,y2) = (corners[7][0][0],corners[7][0][1])
-        (x3,y3) = (corners[45][0][0],corners[45][0][1])
-        (x4,y4) = (corners[53][0][0],corners[53][0][1])
-        return True,[(x4,y4),(x3,y3),(x1,y1),(x2,y2)]
-    else: return False, []
 
 def DrawLines(img, points):
     for i in range(1, 17):                
@@ -36,7 +20,6 @@ def DrawLines(img, points):
          y2 = points[1, i]
          cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)), (255, 0, 0),5) 
     return img
-
 
 def getCubePoints(center, size,chessSquare_size):
 
@@ -78,134 +61,50 @@ def getCubePoints(center, size,chessSquare_size):
     points=dot(points,chessSquare_size)
     return array(points).T
 
-def getCameraMethod1(currentFrame):
-    globals()
-    I1Gray = cv2.cvtColor(firstView, cv2.COLOR_RGB2GRAY)
-    I2Gray = cv2.cvtColor(currentFrame, cv2.COLOR_RGB2GRAY)
-    I1Corners = getCornerCoords(I1Gray)[1]
-    I2Corners = getCornerCoords(I2Gray)[1]
-
-    if(I1Corners == None or I2Corners == None):
-        return
-    H = estimateHomography(I1Corners, I2Corners)
-    # compute second camera matrix from cam1.
-    return Camera(dot(H, cam1.P))
-
-
-def getCameraMethod2(currentFrame, distortCoefs):
-    ##object points
-    pattern_size=(9,6)
-    pattern_points = np.zeros( (np.prod(pattern_size), 3), np.float32 )
-    pattern_points[:,:2] = np.indices(pattern_size).T.reshape(-1, 2)
-    pattern_points *= chessSquare_size
-    obj_points = [pattern_points]
-    obj_points.append(pattern_points)
-    obj_points = np.array(obj_points,np.float64).T
-    obj_points=obj_points[:,:,0].T
-    K,r,t = cam1.factor()
-    #--------
-    fou, imPoints = cv2.findChessboardCorners(currentFrame,(9,6))
-    if(not fou):
-        return None
-    found, rvecs_new, tvecs_new = GetObjectPos(obj_points,imPoints,K,distortCoefs)
-    if(not found):
-        return None
-    rvecs_new = cv2.Rodrigues(np.array(rvecs_new))[0]
-    return Camera(np.dot(K, np.hstack((rvecs_new, tvecs_new))))
-
 
 def update(img):
-    globals()
-    Undistorting = True;
+    image=copy(img)
+
+
     if Undistorting:  #Use previous stored camera matrix and distortion coefficient to undistort the image
-        distortC = np.load("numpyData/distortionCoefficient.npy")
-        image = cv2.undistort(img, cameraMat, distortC)
+        ''' <004> Here Undistoret the image''' 
     
-    if (ProcessFrame):
-        I1grey = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-        found, I1corners = getCornerCoords(I1grey)
-        patternFound=found
+    if (ProcessFrame): 
+
+        ''' <005> Here Find the Chess pattern in the current frame'''
+        patternFound=True          
     
         if patternFound ==True:        
             
             ''' <006> Here Define the cameraMatrix P=K[R|t] of the current frame'''
 
-            if(debug):
-                #P2_METHOD2
-                camera = getCameraMethod2(img, distortC)
-                if camera == None:
-                    return
-                camera.factor()
-            else:
-                #P2_METHOD1
-                camera = getCameraMethod1(img)
-                if camera == None:
-                    return
-                camera.factor()
-
-
-
-
+        
             if ShowText:
                 ''' <011> Here show the distance between the camera origin and the world origin in the image'''                    
                 
-                # cv2.putText(image,str("frame:" + str(frameNumber)), (20,10),cv2.FONT_HERSHEY_PLAIN,1, (255, 255, 255))#Draw the text
+                cv2.putText(image,str("frame:" + str(frameNumber)), (20,10),cv2.FONT_HERSHEY_PLAIN,1, (255, 255, 255))#Draw the text
 
-                ''' <008> Here Draw the world coordinate system in the image'''
-                #okay kids look below.. four point. first is origin, next three are x,y,z
-                o = np.matrix([0,0,0,1])
-                x = np.matrix([3,0,0,1])
-                y = np.matrix([0,3,0,1])
-                z = np.matrix([0,0,-3,1])
-
-
-                originCoord = [o.T,x.T,y.T,z.T]
-                for point in originCoord:
-                    origin = camera.project(originCoord[0])
-                    poin = camera.project(point)
-                    cv2.line(img,(int(origin[0]),int(origin[1])),(int(poin[0]),int(poin[1])),(255,255,0),2)
+            ''' <008> Here Draw the world coordinate system in the image'''            
             
             if TextureMap:
-                ''' <010> Here Do the texture mapping and draw the texture on the faces of the cube'''
-                ITop = cv2.imread("data/Images3/Top.jpg")
-
-                mTop,nTop,i = shape(ITop)
-                topTexPoints = [[0,0],[0,nTop],[mTop,nTop],[mTop,0]]
-
-                box_cam = np.array(camera.project(toHomogenious(box)))
-                #making a H between texture and side of cube
-                print shape(box_cam)
-                #toppen
-                cv2.circle(img, (int(box_cam[0][0]),int(box_cam[1][0])),15,(0,255,234))
-                cv2.circle(img, (int(box_cam[0][1]),int(box_cam[1][1])),15,(0,255,234))
-                cv2.circle(img, (int(box_cam[0][2]),int(box_cam[1][2])),15,(0,255,234))
-                cv2.circle(img, (int(box_cam[0][3]),int(box_cam[1][3])),15,(0,255,234))
-
-                # topP1 =
-                # H = estimateHomography()
-                # I1=cv2.bitwise_and( Mask,image)
-                # image=cv2.bitwise_or(I1, texture)
+                ''' <010> Here Do the texture mapping and draw the texture on the faces of the cube'''  
                 ''' <012> Here Remove the hidden faces'''  
 
                 ''' <013> Here Remove the hidden faces'''  
 
 
-            if ProjectPattern:
-                ''' <007> Here Test the camera matrix of the current view by projecting the pattern points'''
-                points = toHomogenious(np.array(np.load("numpyData/obj_points.npy"))[0].T)
-                projected_points = camera.project(points)
-                for point in projected_points.T:
-                    cv2.circle(img,(int(point[0,0]),int(point[0,1])),5,(255,255,0),2)
-
+            if ProjectPattern:                  
+                ''' <007> Here Test the camera matrix of the current view by projecting the pattern points''' 
+            
+        
 
             if WireFrame:                      
-                ''' <009> Here Project the box into the current camera image and draw the box edges'''
-                # box = getCubePoints((0,0,0),2,2)
-                box_cam = camera.project(toHomogenious(box))
-                DrawLines(img,box_cam)
-    cv2.imshow('Web cam', img)
+                ''' <009> Here Project the box into the current camera image and draw the box edges''' 
+    
+
+    cv2.imshow('Web cam', image)  
     global result
-    result=copy(img)
+    result=copy(image)
 
 def getImageSequence(capture, fastForward):
     '''Load the video sequence (fileName) and proceeds, fastForward number of frames.'''
@@ -227,16 +126,16 @@ def printUsage():
     print 'g: project the pattern using the camera matrix (test)'
     print 's: save frame'
     print 'x: do something!'
-
+    
    
 def run(speed): 
     
     '''MAIN Method to load the image sequence and handle user inputs'''   
 
     #--------------------------------video
-    capture = cv2.VideoCapture("Pattern.avi")
+    #capture = cv2.VideoCapture("Pattern.avi")
     #--------------------------------camera
-    #capture = cv2.VideoCapture(0)
+    capture = cv2.VideoCapture(0)
 
     image, isSequenceOK = getImageSequence(capture,speed)       
 
@@ -246,13 +145,10 @@ def run(speed):
 
     while(isSequenceOK):
         OriginalImage=copy(image)
-         
+     
         
         inputKey = cv2.waitKey(1)
         
-        if inputKey > 1000: # Linux hack
-            inputKey =  inputKey % 256;
-
         if inputKey == 32:#  stop by SPACE key
             update(OriginalImage)
             if speed==0:     
@@ -345,7 +241,7 @@ global chessSquare_size
     
 ProcessFrame=False
 Undistorting=False   
-WireFrame=True
+WireFrame=False
 ShowText=True
 TextureMap=True
 ProjectPattern=False
@@ -391,44 +287,10 @@ DownFace = box[i,j]
 
 
 ''' <000> Here Call the cameraCalibrate2 from the SIGBTools to calibrate the camera and saving the data''' 
-# calibrateCamera()
-# cameraCalibrate2(5,(9,6),2.0,0)
-# RecordVideoFromCamera()
-
 ''' <001> Here Load the numpy data files saved by the cameraCalibrate2''' 
-cameraMat  = np.load("numpyData/camera_matrix.npy")
-roVectors = np.load("numpyData/rotatioVectors.npy")
-transVectors  = np.load("numpyData/translationVectors.npy")
-
 ''' <002> Here Define the camera matrix of the first view image (01.png) recorded by the cameraCalibrate2''' 
-
-roVectors = cv2.Rodrigues(np.array(roVectors)[0])[0]
-transVectors = np.array(transVectors)[0]
-
-# print "rotationvector",roVectors
-# print "transvector",transVectors
-
-
-cam1 = Camera(np.dot(cameraMat, np.hstack((roVectors, transVectors))))
-
-cam1.factor()
-
-# box_cam1 = cam1.project(toHomogenious(box))
-
-
 ''' <003> Here Load the first view image (01.png) and find the chess pattern and store the 4 corners of the pattern needed for homography estimation''' 
-firstView = cv2.imread("01.png")
-
-# points = toHomogenious(np.array(np.load("numpyData/obj_points.npy"))[0].T)
-# projected_points = cam1.project(points)
-
-# for point in projected_points.T:
-#    cv2.circle(firstView,(int(point[0,0]),int(point[0,1])),5,(255,255,0),2)
-
-# cv2.imshow("myss",firstView)
-# cv2.waitKey(0)
 
 
 
 run(1)
-# vim: set ts=4:shiftwidth=4:expandtab:
