@@ -113,6 +113,58 @@ def getCameraMethod2(currentFrame, distortCoefs):
     rvecs_new = cv2.Rodrigues(np.array(rvecs_new))[0]
     return Camera(np.dot(K, np.hstack((rvecs_new, tvecs_new))))
 
+def drawSurfaceVectors(img, face, camera):
+
+    """vector = np.cross(vecA, vecB)
+    x1,y1,z1 = vecA
+    x2,y2,z2 = vecB
+    origin = [[(x1+x2)/2],[(y1+y2)/2],[(z1+z2)/2],[1]]
+    theEnd = np.dot(np.array(origin),np.array(vector))"""
+    va = np.array([(face[0][0] - face[0][1]), (face[1][0] - face[1][1]), (face[2][0] - face[2][1])]) #vector between two face points
+    vb = np.array([(face[0][0] - face[0][2]), (face[1][0] - face[1][2]), (face[2][0] - face[2][2])]) #vector between two face points (one is different than in the above line)
+    v=np.cross(va,vb)
+    vH=np.array([v[0],v[1],v[2],1]).T
+    vP = np.array(camera.p(vH))
+
+    cv2.line(img, (50,50),(50+vP[0], 50+vP[1]), (0,255,255),20)
+    return img
+
+
+def addTexWeighted(img, tex, Face, camera):
+    ITop = tex
+    mTop,nTop,i = shape(ITop)
+    topTexPoints = [(0,0),(0,nTop),(mTop,nTop),(mTop,0)]
+    side_cam = np.array(camera.project(toHomogenious(Face)))
+
+    #toppen
+    sideCam = [(int(side_cam[0][0]),int(side_cam[1][0])), (int(side_cam[0][1]),int(side_cam[1][1])),
+              (int(side_cam[0][2]),int(side_cam[1][2])), (int(side_cam[0][3]),int(side_cam[1][3]))]
+    #making a H between texture and side of cube
+    H = estimateHomography(topTexPoints, sideCam)
+    m,n,d = shape(img)
+    overlay = cv2.warpPerspective(ITop,H,(n,m))
+    img = cv2.addWeighted(img,0.5,overlay,0.5,0)
+    return img
+
+def addTexMask(img, tex, Face, camera):
+    ITop = tex
+    mTop,nTop,i = shape(ITop)
+    topTexPoints = [(0,0),(0,nTop),(mTop,nTop),(mTop,0)]
+    side_cam = np.array(camera.project(toHomogenious(Face)))
+
+    #toppen
+    sideCam = [(int(side_cam[0][0]),int(side_cam[1][0])), (int(side_cam[0][1]),int(side_cam[1][1])),
+              (int(side_cam[0][2]),int(side_cam[1][2])), (int(side_cam[0][3]),int(side_cam[1][3]))]
+    #making a H between texture and side of cube
+    H = estimateHomography(topTexPoints, sideCam)
+    m,n,d = shape(img)
+    overlay = cv2.warpPerspective(ITop,H,(n,m))
+    Mask = cv2.threshold(overlay,1,255,cv2.THRESH_BINARY)[1]
+    backGr = 255 - Mask
+    I1 = cv2.bitwise_and(backGr, img)
+    img = cv2.bitwise_or(I1, overlay)
+
+    return img
 
 def update(img):
     globals()
@@ -149,7 +201,11 @@ def update(img):
             if ShowText:
                 ''' <011> Here show the distance between the camera origin and the world origin in the image'''                    
                 
-                # cv2.putText(image,str("frame:" + str(frameNumber)), (20,10),cv2.FONT_HERSHEY_PLAIN,1, (255, 255, 255))#Draw the text
+
+                K,R,T = camera.factor()
+                x,y,z = T
+                dist = sqrt(pow(x,2)+pow(y,2)+pow(z,2))
+                cv2.putText(img,str("frame:" + str(frameNumber) +str(" Dist: ")+ str(dist)), (20,10),cv2.FONT_HERSHEY_PLAIN,1, (255, 255, 255))#Draw the text
 
                 ''' <008> Here Draw the world coordinate system in the image'''
                 #okay kids look below.. four point. first is origin, next three are x,y,z
@@ -157,7 +213,6 @@ def update(img):
                 x = np.matrix([3,0,0,1])
                 y = np.matrix([0,3,0,1])
                 z = np.matrix([0,0,-3,1])
-
 
                 originCoord = [o.T,x.T,y.T,z.T]
                 for point in originCoord:
@@ -168,24 +223,27 @@ def update(img):
             if TextureMap:
                 ''' <010> Here Do the texture mapping and draw the texture on the faces of the cube'''
                 ITop = cv2.imread("data/Images3/Top.jpg")
+                ILeft = cv2.imread("data/Images3/Left.jpg")
+                IRight = cv2.imread("data/Images3/Right.jpg")
+                IDown = cv2.imread("data/Images3/Down.jpg")
+                IUp = cv2.imread("data/Images3/Up.jpg")
+                # img = addTexWeighted(img,ITop,TopFace, camera)
+                # img = addTexWeighted(img,ILeft,LeftFace, camera)
+                # img = addTexWeighted(img,IRight,RightFace, camera)
+                # img = addTexWeighted(img,IDown,DownFace, camera)
+                # img = addTexWeighted(img,IUp,UpFace, camera)
 
-                mTop,nTop,i = shape(ITop)
-                topTexPoints = [[0,0],[0,nTop],[mTop,nTop],[mTop,0]]
+                img = addTexMask(img,ITop,TopFace, camera)
+                img = addTexMask(img,ILeft,LeftFace, camera)
+                img = addTexMask(img,IRight,RightFace, camera)
+                img = addTexMask(img,IDown,DownFace, camera)
+                img = addTexMask(img,IUp,UpFace, camera)
 
-                box_cam = np.array(camera.project(toHomogenious(box)))
-                #making a H between texture and side of cube
-                print shape(box_cam)
-                #toppen
-                cv2.circle(img, (int(box_cam[0][0]),int(box_cam[1][0])),15,(0,255,234))
-                cv2.circle(img, (int(box_cam[0][1]),int(box_cam[1][1])),15,(0,255,234))
-                cv2.circle(img, (int(box_cam[0][2]),int(box_cam[1][2])),15,(0,255,234))
-                cv2.circle(img, (int(box_cam[0][3]),int(box_cam[1][3])),15,(0,255,234))
+                ''' <012> Here draw the surface vectors'''
+                vec1 = ([TopFace[0][0]],[TopFace[1][0]],[TopFace[2][0]])
+                vec2 = ([TopFace[0][1]],[TopFace[1][1]],[TopFace[2][1]])
 
-                # topP1 =
-                # H = estimateHomography()
-                # I1=cv2.bitwise_and( Mask,image)
-                # image=cv2.bitwise_or(I1, texture)
-                ''' <012> Here Remove the hidden faces'''  
+                img = drawSurfaceVectors(img,TopFace,camera)
 
                 ''' <013> Here Remove the hidden faces'''  
 
@@ -234,7 +292,7 @@ def run(speed):
     '''MAIN Method to load the image sequence and handle user inputs'''   
 
     #--------------------------------video
-    capture = cv2.VideoCapture("Pattern.avi")
+    capture = cv2.VideoCapture("Pattern2.avi")
     #--------------------------------camera
     #capture = cv2.VideoCapture(0)
 
@@ -393,7 +451,7 @@ DownFace = box[i,j]
 ''' <000> Here Call the cameraCalibrate2 from the SIGBTools to calibrate the camera and saving the data''' 
 # calibrateCamera()
 # cameraCalibrate2(5,(9,6),2.0,0)
-RecordVideoFromCamera()
+# RecordVideoFromCamera()
 
 ''' <001> Here Load the numpy data files saved by the cameraCalibrate2''' 
 cameraMat  = np.load("numpyData/camera_matrix.npy")
@@ -430,5 +488,5 @@ firstView = cv2.imread("01.png")
 
 
 
-#run(1)
+run(1)
 # vim: set ts=4:shiftwidth=4:expandtab:

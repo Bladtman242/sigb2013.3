@@ -778,9 +778,9 @@ def cameraCalibrate2(n=5,pattern_size=(9,6),square_size=2.0,fileName="Pattern.av
             cv2.imshow("camera", img)
         
 
-def RecordVideoFromCamera():
+def RecordVideoFromCamera(I):
     cap = cv2.VideoCapture(0)
-    f,I = cap.read() 
+    f,I = cap.read()
     
     print I.shape
     H,W,Z=I.shape
@@ -817,7 +817,6 @@ class Camera:
     
     def project(self,X):
         """    Project points in X (4*n array) and normalize coordinates. """
-        
         x = dot(self.P,X)
         for i in range(3):
             x[i] /= x[2]    
