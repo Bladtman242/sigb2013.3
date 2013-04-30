@@ -128,11 +128,20 @@ def drawSurfaceVectors(img, face, camera):
     b = np.array([face[0][1],face[1][1], face[2][1], 1]).T
     b = np.array(np.dot(camera.P,b))[0]
 
+    c = np.array([face[0][2],face[1][2], face[2][2], 1]).T
+    c = np.array(np.dot(camera.P,c))[0]
+
     a = np.array([a[0]/a[2], a[1]/a[2]])
+    b = np.array([b[0]/b[2], b[1]/b[2]])
     b = np.array([b[0]/b[2], b[1]/b[2]])
 
     cv2.circle(img,(int(a[0]),int(a[1])),20,(232,23,54))
     cv2.circle(img,(int(b[0]),int(b[1])),20,(232,23,54))
+    cv2.circle(img,(int(c[0]),int(c[1])),20,(232,23,54))
+
+    #cv2.putText(img,"a", (int(a[0]),int(a[1])),cv2.FONT_HERSHEY_PLAIN,2, (255, 255, 255))#Draw the text
+    #cv2.putText(img,"b", (int(b[0]),int(b[1])),cv2.FONT_HERSHEY_PLAIN,2, (255, 255, 255))#Draw the text
+    #cv2.putText(img,"c", (int(c[0]),int(c[2])),cv2.FONT_HERSHEY_PLAIN,2, (255, 255, 255))#Draw the text
 
 
     # va = np.array([(face[0][0] - face[0][1]), (face[1][0] - face[1][1]), (face[2][0] - face[2][1])]) #vector between two face points
