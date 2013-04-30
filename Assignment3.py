@@ -120,14 +120,28 @@ def drawSurfaceVectors(img, face, camera):
     x2,y2,z2 = vecB
     origin = [[(x1+x2)/2],[(y1+y2)/2],[(z1+z2)/2],[1]]
     theEnd = np.dot(np.array(origin),np.array(vector))"""
-    va = np.array([(face[0][0] - face[0][1]), (face[1][0] - face[1][1]), (face[2][0] - face[2][1])]) #vector between two face points
-    vb = np.array([(face[0][0] - face[0][2]), (face[1][0] - face[1][2]), (face[2][0] - face[2][2])]) #vector between two face points (one is different than in the above line)
-    v=np.cross(va,vb) #orthogonal to surface spanned by va and vb, which I've yet to ensure are allways the right vectors
-    vH=np.array([v[0],v[1],v[2],1]).T
-    vP = np.array(np.dot(camera.P,vH)) #projected
-	vP = np.array([vP[0]/vP[2], vP[1]/vP[2],1]) #normalized
+    # face = camera.project(toHomogenious(face))
 
-    cv2.line(img, (50,50),(50+vP[0], 50+vP[1]), (0,255,255),20)
+    a = np.array([face[0][0],face[1][0], face[2][0], 1]).T
+    a = np.array(np.dot(camera.P,a))[0]
+    print shape(a)
+    print a
+    a = np.array([a[0]/a[2], a[1]/a[2]])
+    b = face[0][1]
+    cv2.circle(img,(a[0],a[1]),4,(232,233,54))
+
+
+
+    # va = np.array([(face[0][0] - face[0][1]), (face[1][0] - face[1][1]), (face[2][0] - face[2][1])]) #vector between two face points
+    # vb = np.array([(face[0][0] - face[0][2]), (face[1][0] - face[1][2]), (face[2][0] - face[2][2])]) #vector between two face points (one is different than in the above line)
+    # v = np.cross(va,vb) #orthogonal to surface spanned by va and vb, which I've yet to ensure are allways the right vectors
+    # vH=np.array([v[0],v[1],v[2],1])
+    # vP = np.array(np.dot(camera.P,vH)).T #projected
+    # print "vp", vP
+    # print "shape",shape(vP)
+    # vP = np.array([vP[0]/vP[2], vP[1]/vP[2],1]) #normalized
+    #
+    # cv2.line(img, (50,50),(50+vP[0], 50+vP[1]), (0,255,255),20)
     return img
 
 
@@ -241,7 +255,7 @@ def update(img):
 
                 ''' <012> Here draw the surface vectors'''
 
-                img = drawSurfaceVectors(img,TopFace,camera)
+                # img = drawSurfaceVectors(img,TopFace,camera)
 
                 ''' <013> Here Remove the hidden faces'''  
 
