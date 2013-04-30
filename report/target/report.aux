@@ -1,0 +1,64 @@
+\relax 
+\ifx\hyper@anchor\@undefined
+\global \let \oldcontentsline\contentsline
+\gdef \contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global \let \oldnewlabel\newlabel
+\gdef \newlabel#1#2{\newlabelxx{#1}#2}
+\gdef \newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\let \contentsline\oldcontentsline
+\let \newlabel\oldnewlabel}
+\else
+\global \let \hyper@last\relax 
+\fi
+
+\select@language{english}
+\@writefile{toc}{\select@language{english}}
+\@writefile{lof}{\select@language{english}}
+\@writefile{lot}{\select@language{english}}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{2}{section.1}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Homographies}{3}{section.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Basics}{3}{subsection.2.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Representation}{4}{subsection.2.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Properties}{5}{subsection.2.3}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Mapping Ground View to Map Location}{5}{section.3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Top: Ground-view. Bottom: Top-view map}}{6}{figure.1}}
+\newlabel{fig:groundvsmap}{{1}{6}{Top: Ground-view. Bottom: Top-view map\relax }{figure.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Top: Using $H_{G}^{M}$ to map floor to floor. Bottom: Using the same homography to map stairs to stairs}}{7}{figure.2}}
+\newlabel{fig:floorvsstairs}{{2}{7}{Top: Using $H_{G}^{M}$ to map floor to floor. Bottom: Using the same homography to map stairs to stairs\relax }{figure.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Mapping Transformations}{8}{section.4}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Texture mapping}{8}{section.5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Linear Texture mapping}{8}{subsection.5.1}}
+\newlabel{mapping}{{5.1}{9}{Linear Texture mapping\relax }{subsection.5.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.1}Code}{9}{subsubsection.5.1.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Realistic texture mapping}{10}{subsection.5.2}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.1}Code}{11}{subsubsection.5.2.1}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Augmented reality}{13}{section.6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Camera Calibration}{13}{subsection.6.1}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Focal length}}{13}{figure.3}}
+\newlabel{fig:focal_length}{{3}{13}{Focal length\relax }{figure.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Camera internal matrixes}{14}{subsection.6.2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Intrinsic/camera -matrix (here represented by "A")}}{14}{figure.4}}
+\newlabel{fig:intrinsic_parameters}{{4}{14}{Intrinsic/camera -matrix (here represented by "A")\relax }{figure.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}projecting and image using K* [I | O]}{14}{subsection.6.3}}
+\newlabel{homogenious_projection}{{6.3}{14}{projecting and image using K* [I | O]\relax }{subsection.6.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Theory of our implementation}{15}{subsection.6.4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces The first projection onto a fully frontal surface.}}{15}{figure.5}}
+\newlabel{aug1}{{5}{15}{The first projection onto a fully frontal surface}{figure.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Estimating the third axis from the existing two by taking the AxB crossproduct.}}{16}{figure.6}}
+\newlabel{cross_product}{{6}{16}{Estimating the third axis from the existing two by taking the AxB crossproduct}{figure.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Our Code: (the important lines)}{16}{subsection.6.5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}Augmentation, our results}{17}{subsection.6.6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Our first projection onto the pattern image. The perspective projection effect is very visable on this image. Notice the translation of the pattern. This will affect the placement of the box on the rest of the images.}}{17}{figure.7}}
+\newlabel{result0}{{7}{17}{Our first projection onto the pattern image. The perspective projection effect is very visable on this image. Notice the translation of the pattern. This will affect the placement of the box on the rest of the images}{figure.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces On this image the chessboard is only moved slightly away from the full frontal position. The position of the boc on the pattern doesn\IeC {\textquoteright }t correspond to the position of the pattern image, but is consistent with the rest of the images.}}{18}{figure.8}}
+\newlabel{result1}{{8}{18}{On this image the chessboard is only moved slightly away from the full frontal position. The position of the boc on the pattern doesn’t correspond to the position of the pattern image, but is consistent with the rest of the images}{figure.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces The 3d effect gets more pronounced as the chessboard is moved further away from the frontal position. The box doesn\IeC {\textquoteright }t look completely even, but that is caused by the estimation of the z axis.}}{18}{figure.9}}
+\newlabel{result2}{{9}{18}{The 3d effect gets more pronounced as the chessboard is moved further away from the frontal position. The box doesn’t look completely even, but that is caused by the estimation of the z axis}{figure.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces As we see here. The projection and plotting of the box, doesn\IeC {\textquoteright }t care about image limits in this implementation. Gives a pretty nice effect though. (Best viewed with 3d glasses :-))}}{19}{figure.10}}
+\newlabel{result3}{{10}{19}{As we see here. The projection and plotting of the box, doesn’t care about image limits in this implementation. Gives a pretty nice effect though. (Best viewed with 3d glasses :-))\relax }{figure.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces The augmentation effect works best when the surroundings are visible. Also note that the box looks a bit skewed/uneven but follows the chessboard pattern exactly because of the homography.}}{19}{figure.11}}
+\newlabel{result4}{{11}{19}{The augmentation effect works best when the surroundings are visible. Also note that the box looks a bit skewed/uneven but follows the chessboard pattern exactly because of the homography}{figure.11}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Last image. Lets just notice that it looks awesome. Next stop cool 3d models projected on family photos.}}{20}{figure.12}}
+\newlabel{result5}{{12}{20}{Last image. Lets just notice that it looks awesome. Next stop cool 3d models projected on family photos}{figure.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.7}Taking it live}{20}{subsection.6.7}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.7.1}We still have to}{21}{subsubsection.6.7.1}}
