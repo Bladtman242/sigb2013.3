@@ -124,12 +124,15 @@ def drawSurfaceVectors(img, face, camera):
 
     a = np.array([face[0][0],face[1][0], face[2][0], 1]).T
     a = np.array(np.dot(camera.P,a))[0]
-    print shape(a)
-    print a
-    a = np.array([a[0]/a[2], a[1]/a[2]])
-    b = face[0][1]
-    cv2.circle(img,(a[0],a[1]),4,(232,233,54))
 
+    b = np.array([face[0][1],face[1][1], face[2][1], 1]).T
+    b = np.array(np.dot(camera.P,b))[0]
+
+    a = np.array([a[0]/a[2], a[1]/a[2]])
+    b = np.array([b[0]/b[2], b[1]/b[2]])
+
+    cv2.circle(img,(int(a[0]),int(a[1])),20,(232,23,54))
+    cv2.circle(img,(int(b[0]),int(b[1])),20,(232,23,54))
 
 
     # va = np.array([(face[0][0] - face[0][1]), (face[1][0] - face[1][1]), (face[2][0] - face[2][1])]) #vector between two face points
@@ -255,7 +258,7 @@ def update(img):
 
                 ''' <012> Here draw the surface vectors'''
 
-                # img = drawSurfaceVectors(img,TopFace,camera)
+                img = drawSurfaceVectors(img,TopFace,camera)
 
                 ''' <013> Here Remove the hidden faces'''  
 
