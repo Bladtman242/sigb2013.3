@@ -799,7 +799,10 @@ def RecordVideoFromCamera(I):
     writer.release()
 
 def GetObjectPos(obj_points, img_points_first,camera_matrix,np_dist_coefs):
-    found,rvecs_new,tvecs_new =cv2.solvePnP(obj_points, img_points_first,camera_matrix,np_dist_coefs)
+    try:
+        found,rvecs_new,tvecs_new =cv2.solvePnP(obj_points, img_points_first,camera_matrix,np_dist_coefs)
+    except ValueError:
+        return cv2.solvePnP(obj_points, img_points_first,camera_matrix,np_dist_coefs)
     return  found,rvecs_new,tvecs_new
 
 

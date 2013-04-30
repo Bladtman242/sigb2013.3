@@ -107,7 +107,12 @@ def getCameraMethod2(currentFrame, distortCoefs):
     fou, imPoints = cv2.findChessboardCorners(currentFrame,(9,6))
     if(not fou):
         return None
-    found, rvecs_new, tvecs_new = GetObjectPos(obj_points,imPoints,K,distortCoefs)
+    try:
+        found, rvecs_new, tvecs_new = GetObjectPos(obj_points,imPoints,K,distortCoefs)
+    except ValueError:
+        rvecs_new, tvecs_new = GetObjectPos(obj_points,imPoints,K,distortCoefs)
+        found = True;
+
     if(not found):
         return None
     rvecs_new = cv2.Rodrigues(np.array(rvecs_new))[0]
