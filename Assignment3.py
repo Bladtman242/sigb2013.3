@@ -122,9 +122,10 @@ def drawSurfaceVectors(img, face, camera):
     theEnd = np.dot(np.array(origin),np.array(vector))"""
     va = np.array([(face[0][0] - face[0][1]), (face[1][0] - face[1][1]), (face[2][0] - face[2][1])]) #vector between two face points
     vb = np.array([(face[0][0] - face[0][2]), (face[1][0] - face[1][2]), (face[2][0] - face[2][2])]) #vector between two face points (one is different than in the above line)
-    v=np.cross(va,vb)
+    v=np.cross(va,vb) #orthogonal to surface spanned by va and vb, which I've yet to ensure are allways the right vectors
     vH=np.array([v[0],v[1],v[2],1]).T
-    vP = np.array(camera.p(vH))
+    vP = np.array(np.dot(camera.P,vH)) #projected
+	vP = np.array([vP[0]/vP[2], vP[1]/vP[2],1]) #normalized
 
     cv2.line(img, (50,50),(50+vP[0], 50+vP[1]), (0,255,255),20)
     return img
@@ -239,8 +240,6 @@ def update(img):
                 img = addTexMask(img,IUp,UpFace, camera)
 
                 ''' <012> Here draw the surface vectors'''
-                vec1 = ([TopFace[0][0]],[TopFace[1][0]],[TopFace[2][0]])
-                vec2 = ([TopFace[0][1]],[TopFace[1][1]],[TopFace[2][1]])
 
                 img = drawSurfaceVectors(img,TopFace,camera)
 
