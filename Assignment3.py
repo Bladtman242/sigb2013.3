@@ -115,45 +115,41 @@ def getCameraMethod2(currentFrame, distortCoefs):
 
 def drawSurfaceVectors(img, face, camera):
 
-    """vector = np.cross(vecA, vecB)
-    x1,y1,z1 = vecA
-    x2,y2,z2 = vecB
-    origin = [[(x1+x2)/2],[(y1+y2)/2],[(z1+z2)/2],[1]]
-    theEnd = np.dot(np.array(origin),np.array(vector))"""
-    # face = camera.project(toHomogenious(face))
+    a = np.array([face[0][0],face[1][0], face[2][0]]).T
+    #a = np.array(np.dot(camera.P,a))[0]
 
-    a = np.array([face[0][0],face[1][0], face[2][0], 1]).T
-    a = np.array(np.dot(camera.P,a))[0]
+    b = np.array([face[0][1],face[1][1], face[2][1]]).T
+    #b = np.array(np.dot(camera.P,b))[0]
 
-    b = np.array([face[0][1],face[1][1], face[2][1], 1]).T
-    b = np.array(np.dot(camera.P,b))[0]
+    c = np.array([face[0][2],face[1][2], face[2][2]]).T
+    #c = np.array(np.dot(camera.P,c))[0]
 
-    c = np.array([face[0][2],face[1][2], face[2][2], 1]).T
-    c = np.array(np.dot(camera.P,c))[0]
+    a = np.array([a[0], a[1],a[2]])
+    b = np.array([b[0], b[1],b[2]])
+    c = np.array([c[0], c[1],c[2]])
 
-    a = np.array([a[0]/a[2], a[1]/a[2]])
-    b = np.array([b[0]/b[2], b[1]/b[2]])
-    b = np.array([b[0]/b[2], b[1]/b[2]])
+    cv2.putText(img,"a", (int(a[0]),int(a[1])),cv2.FONT_HERSHEY_PLAIN,2, (255, 255, 255))#Draw the text
+    cv2.putText(img,"b", (int(b[0]),int(b[1])),cv2.FONT_HERSHEY_PLAIN,2, (255, 255, 255))#Draw the text
+    cv2.putText(img,"c", (int(c[0]),int(c[1])),cv2.FONT_HERSHEY_PLAIN,2, (255, 255, 255))#Draw the text
 
-    cv2.circle(img,(int(a[0]),int(a[1])),20,(232,23,54))
-    cv2.circle(img,(int(b[0]),int(b[1])),20,(232,23,54))
-    cv2.circle(img,(int(c[0]),int(c[1])),20,(232,23,54))
+    #vector between two face points
+    v_ba = np.array([a[0]-b[0],a[1]-b[1],a[2]-b[2]])
+    v_bc = np.array([c[0]-b[0],c[1]-b[1],c[2]-b[2]])
 
-    #cv2.putText(img,"a", (int(a[0]),int(a[1])),cv2.FONT_HERSHEY_PLAIN,2, (255, 255, 255))#Draw the text
-    #cv2.putText(img,"b", (int(b[0]),int(b[1])),cv2.FONT_HERSHEY_PLAIN,2, (255, 255, 255))#Draw the text
-    #cv2.putText(img,"c", (int(c[0]),int(c[2])),cv2.FONT_HERSHEY_PLAIN,2, (255, 255, 255))#Draw the text
+    cent = ((v_ba+v_bc)/2) + b
+    norm = np.cross(v_ba,v_bc)
+
+    normTip = cent + norm
+    print "cent", cent
+    print "norm", norm
+    print "normtip", normTip
+    cent_proj = camera.project(toHomogenious(np.array([cent]).T))
+    print "projected cent", cent_proj
+    normTip_proj = camera.project(toHomogenious(np.array([normTip]).T))
+
+    cv2.line(img, (cent_proj[0],cent_proj[1]), (normTip_proj[0],normTip_proj[1]), (0,255,255), 3)
 
 
-    # va = np.array([(face[0][0] - face[0][1]), (face[1][0] - face[1][1]), (face[2][0] - face[2][1])]) #vector between two face points
-    # vb = np.array([(face[0][0] - face[0][2]), (face[1][0] - face[1][2]), (face[2][0] - face[2][2])]) #vector between two face points (one is different than in the above line)
-    # v = np.cross(va,vb) #orthogonal to surface spanned by va and vb, which I've yet to ensure are allways the right vectors
-    # vH=np.array([v[0],v[1],v[2],1])
-    # vP = np.array(np.dot(camera.P,vH)).T #projected
-    # print "vp", vP
-    # print "shape",shape(vP)
-    # vP = np.array([vP[0]/vP[2], vP[1]/vP[2],1]) #normalized
-    #
-    # cv2.line(img, (50,50),(50+vP[0], 50+vP[1]), (0,255,255),20)
     return img
 
 
@@ -175,6 +171,9 @@ def addTexWeighted(img, tex, Face, camera):
 
 def addTexMask(img, tex, Face, camera):
     ITop = tex
+    white = np.copy(ITop)
+
+    white[:,:] = [255,255,255]
     mTop,nTop,i = shape(ITop)
     topTexPoints = [(0,0),(0,nTop),(mTop,nTop),(mTop,0)]
     side_cam = np.array(camera.project(toHomogenious(Face)))
@@ -185,11 +184,12 @@ def addTexMask(img, tex, Face, camera):
     #making a H between texture and side of cube
     H = estimateHomography(topTexPoints, sideCam)
     m,n,d = shape(img)
-    overlay = cv2.warpPerspective(ITop,H,(n,m))
+    overlay = cv2.warpPerspective(white,H,(n,m))
+    texWarped = cv2.warpPerspective(ITop,H,(n,m))
     Mask = cv2.threshold(overlay,1,255,cv2.THRESH_BINARY)[1]
     backGr = 255 - Mask
     I1 = cv2.bitwise_and(backGr, img)
-    img = cv2.bitwise_or(I1, overlay)
+    img = cv2.bitwise_or(I1, texWarped)
 
     return img
 
@@ -316,7 +316,7 @@ def run(speed):
     '''MAIN Method to load the image sequence and handle user inputs'''   
 
     #--------------------------------video
-    capture = cv2.VideoCapture("Pattern2.avi")
+    capture = cv2.VideoCapture("Pattern6.mp4")
     #--------------------------------camera
     #capture = cv2.VideoCapture(0)
 
@@ -444,9 +444,6 @@ box = getCubePoints([4, 2.5, 0], 1,chessSquare_size)
 i = array([ [0,0,0,0],[1,1,1,1] ,[2,2,2,2]  ])  # indices for the first dim 
 j = array([ [0,3,2,1],[0,3,2,1] ,[0,3,2,1]  ])  # indices for the second dim            
 TopFace = box[i,j]
-print shape(TopFace)
-print tuple(TopFace[0])
-print shape(TopFace[0])
 
 i = array([ [0,0,0,0],[1,1,1,1] ,[2,2,2,2]  ])  # indices for the first dim 
 j = array([ [3,8,7,2],[3,8,7,2] ,[3,8,7,2]  ])  # indices for the second dim            
