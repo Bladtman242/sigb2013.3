@@ -10,6 +10,7 @@ import cv2 as cv2
 import cv2.cv as cv
 from SIGBTools import *
 
+
 global cam1, firstView
 
 def getCornerCoords(boardImg):
@@ -118,7 +119,11 @@ def getCameraMethod2(currentFrame, distortCoefs):
     rvecs_new = cv2.Rodrigues(np.array(rvecs_new))[0]
     return Camera(np.dot(K, np.hstack((rvecs_new, tvecs_new))))
 
-def drawSurfaceVectors(img, face, camera):
+
+
+def drawSurfaceVector(img, face, camera):
+
+def getSurfaceVectors(face, camera):
 
     a = np.array([face[0][0],face[1][0], face[2][0]]).T
     #a = np.array(np.dot(camera.P,a))[0]
@@ -145,16 +150,33 @@ def drawSurfaceVectors(img, face, camera):
     norm = np.cross(v_ba,v_bc)
 
     normTip = cent + norm
-    print "cent", cent
-    print "norm", norm
-    print "normtip", normTip
+
     cent_proj = camera.project(toHomogenious(np.array([cent]).T))
-    print "projected cent", cent_proj
+
     normTip_proj = camera.project(toHomogenious(np.array([normTip]).T))
 
+    camera_center = array(camera.center()).T
+    # print "camera center", camera_center
+    lookVector = camera_center - cent
+    # print "cent", cent
+    #
+    lookVector = lookVector/np.linalg.norm(lookVector)
+    norm = norm/np.linalg.norm(norm)
+    print "angle is   : ",Angle3D(lookVector[0], norm)
+    lookVector_proj = camera.project(toHomogenious(np.array(lookVector).T))
+    # print "camCent1", np.array(camera.center())
+    # print "camera center", toHomogenious(np.array(camera.center()))
+    # cameraCent_proj = camera.project(toHomogenious(np.array(camera.center())))
+    # cv2.line(img, (cent_proj[0],cent_proj[1]), (cameraCent_proj[0],cameraCent_proj[1]), (0,255,255), 3)
     cv2.line(img, (cent_proj[0],cent_proj[1]), (normTip_proj[0],normTip_proj[1]), (0,255,255), 3)
+    cv2.line(img, (cent_proj[0],cent_proj[1]),  (camera.center()[0],camera.center()[1]), (0,255,255), 3)
 
 
+    #p = camera.project((1,1))
+    #p = (p[0],p[1])
+    #p = np.dot(camera.t,p)
+
+    #cv2.circle(img,((lookVector_proj[0]/lookVector_proj[2], lookVector_proj[1]/lookVector_proj[2])),10,(255,0,255))
     return img
 
 
@@ -290,9 +312,17 @@ def update(img):
                 # box = getCubePoints((0,0,0),2,2)
                 box_cam = camera.project(toHomogenious(box))
                 DrawLines(img,box_cam)
+    print Angle3D(np.array([0,0,3]),np.array([1,0,0]))
     cv2.imshow('Web cam', img)
     global result
     result=copy(img)
+
+def Angle3D(v1,v2):
+    #vectot lengths
+    # l1=np.sqrt(v1[0]**2 + v1[1]**2 + v1[2]**2)
+    # l2=np.sqrt(v2[0]**2 + v2[1]**2 + v2[2]**2)
+    ca = np.dot(v1,v2)
+    return acos(ca)*180/math.pi
 
 def getImageSequence(capture, fastForward):
     '''Load the video sequence (fileName) and proceeds, fastForward number of frames.'''
@@ -432,7 +462,7 @@ global chessSquare_size
     
 ProcessFrame=False
 Undistorting=False   
-WireFrame=True
+WireFrame=False
 ShowText=True
 TextureMap=True
 ProjectPattern=False
