@@ -252,6 +252,7 @@ def update(img):
                     cv2.line(img,(int(origin[0]),int(origin[1])),(int(poin[0]),int(poin[1])),(255,255,0),2)
             
             if TextureMap:
+                TopFaceCornerNormals,RightFaceCornerNormals, LeftFaceCornerNormals,UpFaceCornerNormals,DownFaceCornerNormals=CalculateFaceCornerNormals(TopFace,RightFace,LeftFace,UpFace,DownFace)
                 ''' <010> Here Do the texture mapping and draw the texture on the faces of the cube'''
                 ITop = cv2.imread("data/Images3/Top.jpg")
                 ILeft = cv2.imread("data/Images3/Left.jpg")
@@ -269,6 +270,9 @@ def update(img):
                 img = addTexMask(img,IRight,RightFace, camera)
                 img = addTexMask(img,IDown,DownFace, camera)
                 img = addTexMask(img,IUp,UpFace, camera)
+                
+                img=ShadeFace(image,TopFace,TopFaceCornerNormals,currentCamera)
+                
 
                 ''' <012> Here draw the surface vectors'''
 
@@ -293,6 +297,101 @@ def update(img):
     cv2.imshow('Web cam', img)
     global result
     result=copy(img)
+
+def ShadeFace(image,points,faceCorner_Normals, camera):
+
+    global shadeRes
+
+    shadeRes=10
+
+    videoHeight, videoWidth, vd = array(image).shape
+
+#................................
+
+    points_Proj=camera.project(toHomogenious(points))
+
+    points_Proj1 = np.array([[int(points_Proj[0,0]),int(points_Proj[1,0])],[int(
+
+    points_Proj[0,1]),int(points_Proj[1,1])],[int(points_Proj[0,2]),int(points_Proj
+
+    [1,2])],[int(points_Proj[0,3]),int(points_Proj[1,3])]])
+
+#................................
+
+    square = np.array([[0, 0], [shadeRes-1, 0], [shadeRes-1, shadeRes-1], [0, shadeRes-
+
+    1]])
+
+#................................
+
+    H = estimateHomography(square, points_Proj1)
+
+#................................
+
+    Mr0,Mg0,Mb0=CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals, camera)
+
+# HINT
+
+# type(Mr0): <type 'numpy.ndarray'>
+
+# Mr0.shape: (shadeRes, shadeRes)
+
+#................................
+
+    Mr = cv2.warpPerspective(Mr0, H, (videoWidth, videoHeight),flags=cv2.INTER_LINEAR)
+
+    Mg = cv2.warpPerspective(Mg0, H, (videoWidth, videoHeight),flags=cv2.INTER_LINEAR)
+
+    Mb = cv2.warpPerspective(Mb0, H, (videoWidth, videoHeight),flags=cv2.INTER_LINEAR)
+
+#................................
+
+    image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    [r,g,b]=cv2.split(image)
+
+#................................
+
+    whiteMask = np.copy(r)
+
+    whiteMask[:,:]=[0]
+
+    points_Proj2=[]
+
+    points_Proj2.append([int(points_Proj[0,0]),int(points_Proj[1,0])])
+
+    points_Proj2.append([int(points_Proj[0,1]),int(points_Proj[1,1])])
+
+    points_Proj2.append([int(points_Proj[0,2]),int(points_Proj[1,2])])
+
+    points_Proj2.append([int(points_Proj[0,3]),int(points_Proj[1,3])])
+
+    cv2.fillConvexPoly(whiteMask,array(points_Proj2),(255,255,255))
+
+#................................
+
+    r[nonzero(whiteMask>0)]=map(lambda x: max(min(x,255),0),r[nonzero(whiteMask>0)]*Mr[
+
+    nonzero(whiteMask>0)])
+
+    g[nonzero(whiteMask>0)]=map(lambda x: max(min(x,255),0),g[nonzero(whiteMask>0)]*Mg[
+
+    nonzero(whiteMask>0)])
+
+    b[nonzero(whiteMask>0)]=map(lambda x: max(min(x,255),0),b[nonzero(whiteMask>0)]*Mb[
+
+    nonzero(whiteMask>0)])
+
+#................................
+
+    image=cv2.merge((r,g,b))
+
+    image=cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+    return image
+
+def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals, camera):
+    return image
 
 def getImageSequence(capture, fastForward):
     '''Load the video sequence (fileName) and proceeds, fastForward number of frames.'''
