@@ -119,9 +119,39 @@ def getCameraMethod2(currentFrame, distortCoefs):
     rvecs_new = cv2.Rodrigues(np.array(rvecs_new))[0]
     return Camera(np.dot(K, np.hstack((rvecs_new, tvecs_new))))
 
+def doCulling(camera, cent, norm):
+    #camera center in world coords
+    camera_center = array(camera.center()).T
+
+    #vector from cam center to surface center.
+    lookVector = camera_center - cent
+
+    #normalize the vector
+    lookVector = lookVector/np.linalg.norm(lookVector)
+
+    angle = Angle3D(lookVector[0], norm)
+    if (angle > 89):
+        return False
+    else: return True
 
 
-def drawSurfaceVector(img, face, camera):
+def drawSurfaceVector(img, cent, norm, camera):
+    normTip = cent + norm
+
+    cent_proj = camera.project(toHomogenious(np.array([cent]).T))
+
+    normTip_proj = camera.project(toHomogenious(np.array([normTip]).T))
+
+    cv2.line(img, (cent_proj[0],cent_proj[1]), (normTip_proj[0],normTip_proj[1]), (0,255,255), 3)
+
+
+
+    #p = camera.project((1,1))
+    #p = (p[0],p[1])
+    #p = np.dot(camera.t,p)
+
+    #cv2.circle(img,((lookVector_proj[0]/lookVector_proj[2], lookVector_proj[1]/lookVector_proj[2])),10,(255,0,255))
+    return img
 
 def getSurfaceVectors(face, camera):
 
@@ -138,46 +168,18 @@ def getSurfaceVectors(face, camera):
     b = np.array([b[0], b[1],b[2]])
     c = np.array([c[0], c[1],c[2]])
 
-    cv2.putText(img,"a", (int(a[0]),int(a[1])),cv2.FONT_HERSHEY_PLAIN,2, (255, 255, 255))#Draw the text
-    cv2.putText(img,"b", (int(b[0]),int(b[1])),cv2.FONT_HERSHEY_PLAIN,2, (255, 255, 255))#Draw the text
-    cv2.putText(img,"c", (int(c[0]),int(c[1])),cv2.FONT_HERSHEY_PLAIN,2, (255, 255, 255))#Draw the text
-
     #vector between two face points
     v_ba = np.array([a[0]-b[0],a[1]-b[1],a[2]-b[2]])
     v_bc = np.array([c[0]-b[0],c[1]-b[1],c[2]-b[2]])
-
+    #surface center
     cent = ((v_ba+v_bc)/2) + b
-    norm = np.cross(v_ba,v_bc)
 
-    normTip = cent + norm
+    #normalize norm --- ghurt is working here.
+    norm = np.cross(v_ba,v_bc)/np.linalg.norm(np.cross(v_ba,v_bc))
 
-    cent_proj = camera.project(toHomogenious(np.array([cent]).T))
+    #surface center and norm
+    return (cent, norm)
 
-    normTip_proj = camera.project(toHomogenious(np.array([normTip]).T))
-
-    camera_center = array(camera.center()).T
-    # print "camera center", camera_center
-    lookVector = camera_center - cent
-    # print "cent", cent
-    #
-    lookVector = lookVector/np.linalg.norm(lookVector)
-    norm = norm/np.linalg.norm(norm)
-    print "angle is   : ",Angle3D(lookVector[0], norm)
-    lookVector_proj = camera.project(toHomogenious(np.array(lookVector).T))
-    # print "camCent1", np.array(camera.center())
-    # print "camera center", toHomogenious(np.array(camera.center()))
-    # cameraCent_proj = camera.project(toHomogenious(np.array(camera.center())))
-    # cv2.line(img, (cent_proj[0],cent_proj[1]), (cameraCent_proj[0],cameraCent_proj[1]), (0,255,255), 3)
-    cv2.line(img, (cent_proj[0],cent_proj[1]), (normTip_proj[0],normTip_proj[1]), (0,255,255), 3)
-    cv2.line(img, (cent_proj[0],cent_proj[1]),  (camera.center()[0],camera.center()[1]), (0,255,255), 3)
-
-
-    #p = camera.project((1,1))
-    #p = (p[0],p[1])
-    #p = np.dot(camera.t,p)
-
-    #cv2.circle(img,((lookVector_proj[0]/lookVector_proj[2], lookVector_proj[1]/lookVector_proj[2])),10,(255,0,255))
-    return img
 
 
 def addTexWeighted(img, tex, Face, camera):
@@ -274,29 +276,50 @@ def update(img):
                     cv2.line(img,(int(origin[0]),int(origin[1])),(int(poin[0]),int(poin[1])),(255,255,0),2)
             
             if TextureMap:
+
+
+                ''' <012> Here draw the surface vectors'''
+
+                cent,topNorm = getSurfaceVectors(TopFace,camera)
+                cent,leftNorm = getSurfaceVectors(LeftFace,camera)
+                cent,rightNorm = getSurfaceVectors(RightFace,camera)
+                cent,downNorm = getSurfaceVectors(DownFace,camera)
+                cent,upNorm = getSurfaceVectors(UpFace,camera)
+
+                drawSurfaceVector(img, cent, topNorm, camera)
+                ''' <013> Here Remove the hidden faces'''
+                drawTop = doCulling(camera, cent, topNorm)
+                drawLeft = doCulling(camera, cent, leftNorm)
+                drawRight = doCulling(camera, cent, rightNorm)
+                drawDown = doCulling(camera, cent, downNorm)
+                drawUp = doCulling(camera, cent, upNorm)
+
                 ''' <010> Here Do the texture mapping and draw the texture on the faces of the cube'''
-                ITop = cv2.imread("data/Images3/Top.jpg")
-                ILeft = cv2.imread("data/Images3/Left.jpg")
-                IRight = cv2.imread("data/Images3/Right.jpg")
-                IDown = cv2.imread("data/Images3/Down.jpg")
-                IUp = cv2.imread("data/Images3/Up.jpg")
+                if(drawTop):
+                    ITop = cv2.imread("data/Images3/Top.jpg")
+                    img = addTexMask(img,ITop,TopFace, camera)
+                if(drawLeft):
+                    ILeft = cv2.imread("data/Images3/Left.jpg")
+                    img = addTexMask(img,ILeft,LeftFace, camera)
+                if(drawRight):
+                    IRight = cv2.imread("data/Images3/Right.jpg")
+                    img = addTexMask(img,IRight,RightFace, camera)
+                if(drawDown):
+                    IDown = cv2.imread("data/Images3/Down.jpg")
+                    img = addTexMask(img,IDown,DownFace, camera)
+                if(drawUp):
+                    IUp = cv2.imread("data/Images3/Up.jpg")
+                    img = addTexMask(img,IUp,UpFace, camera)
                 # img = addTexWeighted(img,ITop,TopFace, camera)
                 # img = addTexWeighted(img,ILeft,LeftFace, camera)
                 # img = addTexWeighted(img,IRight,RightFace, camera)
                 # img = addTexWeighted(img,IDown,DownFace, camera)
                 # img = addTexWeighted(img,IUp,UpFace, camera)
 
-                img = addTexMask(img,ITop,TopFace, camera)
-                img = addTexMask(img,ILeft,LeftFace, camera)
-                img = addTexMask(img,IRight,RightFace, camera)
-                img = addTexMask(img,IDown,DownFace, camera)
-                img = addTexMask(img,IUp,UpFace, camera)
 
-                ''' <012> Here draw the surface vectors'''
 
-                img = drawSurfaceVectors(img,TopFace,camera)
 
-                ''' <013> Here Remove the hidden faces'''  
+
 
 
             if ProjectPattern:
