@@ -459,6 +459,12 @@ def ShadeFace(image,points,faceCorner_Normals, camera):
     return image
   
 def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera): 
+
+    print "shadeRes", shadeRes
+    print "points", points
+    print "faceCorner_Normals", faceCorner_Normals
+    print "camera", camera
+
     red = np.zeros((shadeRes,shadeRes)) 
     green = np.zeros((shadeRes,shadeRes)) 
     blue = np.zeros((shadeRes,shadeRes)) 
