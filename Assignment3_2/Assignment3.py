@@ -478,11 +478,12 @@ def vecLen3D(x):
 #l is the direction of the light source 
 #n is the normal to the surface at the point p
 # Where is ID? Where is IS?
-def CalculatePhongIlluminationModel(I_ambient,I_diffuse):
+def CalculatePhongIlluminationModel(I_ambient,I_diffuse,I_specular):
     #I_ambient + I_diffuse #+I_glossy
     IA = I_ambient
     ID = I_diffuse
-    return (IA[0]+ID[0],IA[1]+ID[1],IA[2]+ID[2])
+    IS = I_specular
+    return (IA[0]+ID[0]+IS[0],IA[1]+ID[1]+IS[1],IA[2]+ID[2]+IS[2])
 
 def CalculateDiffuse(lightVector, faceCorner_Normals, kd,IL):
 
@@ -514,18 +515,20 @@ def CalculateSpecular(IS,ks,cameraVector,norm):
     # r = mirrorVector
     
     n = np.array(norm.T[0])
-    
     dot = np.dot(IS.T,ks)
     a = 2
 
     l = np.array(cameraVector)
-    print "l",l
     l = l / vecLen3D(l)
 
     r = 2*(np.dot(n,l))
-    print "----r----",r
-    r = r*(np.subtract(n,l))
-    print "----r2----",r
+    r = r*(np.subtract(n,l.T))
+
+    v = l 
+
+    result = np.array(np.array(IS)*np.array(ks)*(np.dot(r,v)**a))
+    print "result",shape(result),result
+    return (result[0],result[1],result[2])
 
 def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity):
     
@@ -580,10 +583,9 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
     
     I_ambient = CalculateAmbient(IA, ka)
     I_diffuse = CalculateDiffuse(lightVector,faceCorner_Normals, kd, IP)
-    I_Specular = CalculateSpecular(IP,ks,lightVector,faceCorner_Normals)
-
-    phong = CalculatePhongIlluminationModel(I_ambient,I_diffuse)
-    print "phong",phong
+    I_specular = CalculateSpecular(IP,ks,lightVector,faceCorner_Normals)
+    
+    phong = CalculatePhongIlluminationModel(I_ambient,I_diffuse,I_specular)
     arrR = np.ones((shadeRes,shadeRes))
     arrG = np.ones((shadeRes,shadeRes))
     arrB = np.ones((shadeRes,shadeRes))
