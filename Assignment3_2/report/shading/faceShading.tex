@@ -1,1 +1,17 @@
-\subsection{Que?}
+\subsection{The ShadeFace method}
+
+The assignment provides us with a lot of boilerplate code used in shading of
+the cube faces. This section will attempt to clarify what is being done in the
+provided code
+
+The code is segregated in multiple sections separated by a comment line of dots.
+The first section is declaration of variables. One important variable is the
+shadeRes, which gives the resolution and therefore the dimensionality of the
+shade. The next section projects the homogenious points from real world
+coordinates to 2D coordinates. Next section defines a square that covers the
+desired face (meaning from 0 to shadeRes in all dimension. Next section is
+defines a homography from the texture to the projected points, meaning that
+we can go from real world to 2D. In the next section three matrices for red,
+green and blue channels respectively is set by our CalculateShadeMatrix
+function. Next section applies the intensity values as a texture on top of the
+image 
