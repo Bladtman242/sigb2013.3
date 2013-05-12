@@ -477,9 +477,8 @@ def vecLen3D(x):
 #l is the direction of the light source 
 #n is the normal to the surface at the point p
 # Where is ID? Where is IS?
-def CalculatePhongIlluminationModel(n,l,r,v,IA,IS,ID,KA,KS,KD):
-    #(IA*KA)+(ID*KD*max(n*l,0))
-    pass;
+def CalculatePhongIlluminationModel(I_ambient,I_diffuse):
+    return I_ambient + I_diffuse #+I_glossy
 
 def CalculateDiffuse(lightSrc, endPoint, faceCorner_Normals, kd,IL):
 
@@ -522,9 +521,6 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
 
     IP = np.matrix([5.0, 5.0, 5.0]).T
     
-    # This is guesswork
-    #ID = np.matrix([5.0, 5.0, 5.0]).T
-
     #Light Source Attenuation
 
     fatt = 1
@@ -553,15 +549,19 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
             ])
     
     
-    (Ir,Ig,Ib) = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals, kd, IP)
+    I_diffuse = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals, kd, IP)
     
+    I_ambient = (2,2,2)
+
+    phong = CalculatePhongIlluminationModel(I_ambient,I_diffuse)
+
     arrR = np.ones((shadeRes,shadeRes))
     arrG = np.ones((shadeRes,shadeRes))
     arrB = np.ones((shadeRes,shadeRes))
 
-    arrR[:] = Ir
-    arrG[:] = Ig
-    arrB[:] = Ib
+    arrR[:] = phong[0]
+    arrG[:] = phong[1]
+    arrB[:] = phong[2]
     
     return (arrR, arrG, arrB)
 
