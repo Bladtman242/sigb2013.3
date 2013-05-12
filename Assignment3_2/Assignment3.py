@@ -298,29 +298,31 @@ def update(img):
                 if(drawTop):
                     ITop = cv2.imread("data/Images3/Top.jpg")
                     img = addTexMask(img,ITop,TopFace, camera)
+                    img=ShadeFace(img,TopFace,TopFaceCornerNormals,camera)
                 if(drawLeft):
                     ILeft = cv2.imread("data/Images3/Left.jpg")
                     img = addTexMask(img,ILeft,LeftFace, camera)
+                    img=ShadeFace(img,LeftFace,LeftFaceCornerNormals,camera)
                 if(drawRight):
                     IRight = cv2.imread("data/Images3/Right.jpg")
                     img = addTexMask(img,IRight,RightFace, camera)
+                    img=ShadeFace(img,RightFace,RightFaceCornerNormals,camera)
                 if(drawDown):
                     IDown = cv2.imread("data/Images3/Down.jpg")
                     img = addTexMask(img,IDown,DownFace, camera)
+                    img=ShadeFace(img,DownFace,DownFaceCornerNormals,camera)
                 if(drawUp):
                     IUp = cv2.imread("data/Images3/Up.jpg")
                     img = addTexMask(img,IUp,UpFace, camera)
+                    img=ShadeFace(img,UpFace,UpFaceCornerNormals,camera)
+
+                #Adds the texture to the surface with cv2 addWeighted method
                 # img = addTexWeighted(img,ITop,TopFace, camera)
                 # img = addTexWeighted(img,ILeft,LeftFace, camera)
                 # img = addTexWeighted(img,IRight,RightFace, camera)
                 # img = addTexWeighted(img,IDown,DownFace, camera)
                 # img = addTexWeighted(img,IUp,UpFace, camera)
 
-                img=ShadeFace(img,TopFace,TopFaceCornerNormals,camera)
-                img=ShadeFace(img,RightFace,RightFaceCornerNormals,camera)
-                img=ShadeFace(img,LeftFace,LeftFaceCornerNormals,camera)
-                img=ShadeFace(img,UpFace,UpFaceCornerNormals,camera)
-                img=ShadeFace(img,DownFace,DownFaceCornerNormals,camera)
 
             if ProjectPattern:
                 ''' <007> Here Test the camera matrix of the current view by projecting the pattern points'''
@@ -338,7 +340,6 @@ def update(img):
     cv2.imshow('Web cam', img)
     global result
     result=copy(img)
-
 
 def Angle3D(v1,v2):
     #vectot lengths
@@ -469,7 +470,7 @@ def ShadeFace(image,points,faceCorner_Normals, camera):
 
 def fallOut(x):
     # return 1/(0.03 * x**2 + 0*x + 0)
-    return 1
+    return 100
 
 def vecLen3D(x):
     return math.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
@@ -478,7 +479,10 @@ def vecLen3D(x):
 #n is the normal to the surface at the point p
 # Where is ID? Where is IS?
 def CalculatePhongIlluminationModel(I_ambient,I_diffuse):
-    return I_ambient + I_diffuse #+I_glossy
+    #I_ambient + I_diffuse #+I_glossy
+    IA = I_ambient
+    ID = I_diffuse
+    return (IA[0]+ID[0],IA[1]+ID[1],IA[2]+ID[2])
 
 def CalculateDiffuse(lightSrc, endPoint, faceCorner_Normals, kd,IL):
 
@@ -506,9 +510,13 @@ def CalculateDiffuse(lightSrc, endPoint, faceCorner_Normals, kd,IL):
 
     return (resultR,resultG,resultB)
 
+def CalculateAmbient(IA, ka):
+    return (IA[0]*ka[0], IA[1]*ka[1], IA[2]*ka[2])
 
 
-def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity): 
+
+
+def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity):
     
     """
     Given in the assignment
@@ -550,11 +558,13 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
     
     
     I_diffuse = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals, kd, IP)
+    #(Ir,Ig,Ib) = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals, kd, IP)
+    #(IAmbientR,IAmbientG,IAmbientB) = CalculateAmbient(IA, ka)
     
-    I_ambient = (2,2,2)
+    I_ambient = CalculateAmbient(IA, ka)
 
     phong = CalculatePhongIlluminationModel(I_ambient,I_diffuse)
-
+    print "phong",phong
     arrR = np.ones((shadeRes,shadeRes))
     arrG = np.ones((shadeRes,shadeRes))
     arrB = np.ones((shadeRes,shadeRes))
@@ -562,7 +572,11 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
     arrR[:] = phong[0]
     arrG[:] = phong[1]
     arrB[:] = phong[2]
-    
+    """
+    arrR[:] = Ir + IAmbientR
+    arrG[:] = Ig + IAmbientG
+    arrB[:] = Ib + IAmbientB
+    """
     return (arrR, arrG, arrB)
 
 def run(speed): 
