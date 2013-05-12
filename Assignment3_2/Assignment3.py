@@ -481,7 +481,7 @@ def CalculatePhongIlluminationModel(n,l,r,v,IA,IS,ID,KA,KS,KD):
     #(IA*KA)+(ID*KD*max(n*l,0))
     pass;
 
-def CalculateDiffuse(lightSrc, endPoint, faceCorner_Normals, kd):
+def CalculateDiffuse(lightSrc, endPoint, faceCorner_Normals, kd,IL):
 
     lightVector = np.array([
             lightSrc[0]-endPoint[0],
@@ -490,21 +490,22 @@ def CalculateDiffuse(lightSrc, endPoint, faceCorner_Normals, kd):
             ])
 
     l = lightVector / vecLen3D(lightVector)
-     
-    #ankl = RobustAngle3D(np.array(faceCorner_Normals.T[0]), np.array(normalizeVecotr(lightVector))[0])
-
-    fo = fallOut(vecLen3D(lightVector))
+    l = l.T[0]
+    print "l",type(l), shape(l), l 
     
-    v = fo*l
-    print "fo", fo
-    print "v", v
+    n = faceCorner_Normals.T[0] 
+    n = n / vecLen3D(n)
+    
+    print "n",type(n), shape(n), n 
 
-    Ilx = vecLen3D(v)
+    print "dot", np.dot(n,l)
+    dot = max((np.dot(n, l)),0)
 
+    resultR = np.array((IL[0] * kd[0]) * dot)[0][0]
+    resultG = np.array((IL[1] * kd[1]) * dot)[0][0]
+    resultB = np.array((IL[2] * kd[2]) * dot)[0][0]
 
-    result = Ilx * max((np.dot(faceCorner_Normals.T[0], l)),0)
-
-    return (kd[0]*result,kd[1]*result,kd[2]*result)
+    return (resultR,resultG,resultB)
 
 
 
@@ -552,7 +553,7 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
             ])
     
     
-    (Ir,Ig,Ib) = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals, kd)
+    (Ir,Ig,Ib) = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals, kd, IP)
     
     arrR = np.ones((shadeRes,shadeRes))
     arrG = np.ones((shadeRes,shadeRes))
