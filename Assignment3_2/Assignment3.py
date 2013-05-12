@@ -471,6 +471,12 @@ def fallOut(x):
 def vecLen3D(x):
     return math.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
 
+#l is the direction of the light source 
+#n is the normal to the surface at the point p
+# Where is ID? Where is IS?
+def CalculatePhongIlluminationModel(IA,KA,ID,KD,n,l,IS,KS):
+    pass;
+
 def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity): 
 
     """
@@ -483,6 +489,9 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
     #Point light IA=[IpR,IpG,IpB]
 
     IP = np.matrix([5.0, 5.0, 5.0]).T
+    
+    # This is guesswork
+    ID = np.matrix([5.0, 5.0, 5.0]).T
 
     #Light Source Attenuation
 
