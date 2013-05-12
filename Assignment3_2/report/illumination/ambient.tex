@@ -1,1 +1,9 @@
 \subsection{Ambient lighting}
+Ambient lighting is the odd one out here. As a fixed-intensity, fixed-color
+light that applies to all everything in the model, it corresponds to a
+posotionless (or omni-present) light source. It has no real-world pendant, but
+provides a basic intensity value for all objects. Its only variable is the
+object material, denoted $K_{a}(x)$. The ambient light value for a point $x$ is
+found by the formula $$I_{ambient}(x) = I_{a}K_{a}(x)$$ Where $I_{a}$
+represents the 'light source' intensity, and $K_{a}(x)$ an intensity weight for
+the object material at the poing $x$.
