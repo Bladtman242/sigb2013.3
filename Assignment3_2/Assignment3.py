@@ -180,8 +180,6 @@ def getSurfaceVectors(face, camera):
     #surface center and norm
     return (cent, norm)
 
-
-
 def addTexWeighted(img, tex, Face, camera):
     ITop = tex
     mTop,nTop,i = shape(ITop)
@@ -470,7 +468,8 @@ def ShadeFace(image,points,faceCorner_Normals, camera):
     return image
 
 def fallOut(x):
-    return 1/(x**2 + 3*x + 1000)
+    # return 1/(0.03 * x**2 + 0*x + 0)
+    return 1
 
 def vecLen3D(x):
     return math.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
@@ -482,7 +481,7 @@ def CalculatePhongIlluminationModel(n,l,r,v,IA,IS,ID,KA,KS,KD):
     #(IA*KA)+(ID*KD*max(n*l,0))
     pass;
 
-def CalculateIntensity(lightSrc, endPoint, faceCorner_Normals):
+def CalculateDiffuse(lightSrc, endPoint, faceCorner_Normals, kd):
 
     lightVector = np.array([
             lightSrc[0]-endPoint[0],
@@ -494,14 +493,20 @@ def CalculateIntensity(lightSrc, endPoint, faceCorner_Normals):
      
     #ankl = RobustAngle3D(np.array(faceCorner_Normals.T[0]), np.array(normalizeVecotr(lightVector))[0])
 
-    fo = fallOut(vecLen3D(l)) 
+    fo = fallOut(vecLen3D(lightVector))
     
-    v = fo*unitVector
+    v = fo*l
+    print "fo", fo
+    print "v", v
 
-    return vecLen3D(v)
+    Ilx = vecLen3D(v)
 
-CalculateDiffuse():
-    pass
+
+    result = Ilx * max((np.dot(faceCorner_Normals.T[0], l)),0)
+
+    return (kd[0]*result,kd[1]*result,kd[2]*result)
+
+
 
 def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity): 
     
@@ -547,12 +552,17 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
             ])
     
     
-    intensity = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals)
+    (Ir,Ig,Ib) = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals, kd)
     
-    arr = np.ones((shadeRes,shadeRes))
-    arr[:] = intensity
+    arrR = np.ones((shadeRes,shadeRes))
+    arrG = np.ones((shadeRes,shadeRes))
+    arrB = np.ones((shadeRes,shadeRes))
+
+    arrR[:] = Ir
+    arrG[:] = Ig
+    arrB[:] = Ib
     
-    return (arr,np.copy(arr),np.copy(arr))
+    return (arrR, arrG, arrB)
 
 def run(speed): 
     
