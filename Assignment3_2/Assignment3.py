@@ -470,9 +470,6 @@ def ShadeFace(image,points,faceCorner_Normals, camera):
 
     return image
 
-def fallOut(x):
-    # return 1/(0.03 * x**2 + 0*x + 0)
-    return 100
 
 def vecLen3D(x):
     return math.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
