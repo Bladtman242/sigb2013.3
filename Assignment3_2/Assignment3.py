@@ -470,7 +470,7 @@ def ShadeFace(image,points,faceCorner_Normals, camera):
     return image
 
 def fallOut(x):
-    return 1/x**2
+    return 1/(x**2 + 3*x + 1000)
 
 def vecLen3D(x):
     return math.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
@@ -482,8 +482,29 @@ def CalculatePhongIlluminationModel(n,l,r,v,IA,IS,ID,KA,KS,KD):
     #(IA*KA)+(ID*KD*max(n*l,0))
     pass;
 
-def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity): 
+def CalculateIntensity(lightSrc, endPoint, faceCorner_Normals):
 
+    lightVector = np.array([
+            lightSrc[0]-endPoint[0],
+            lightSrc[1]-endPoint[1],
+            lightSrc[2]-endPoint[2]
+            ])
+
+    l = lightVector / vecLen3D(lightVector)
+     
+    #ankl = RobustAngle3D(np.array(faceCorner_Normals.T[0]), np.array(normalizeVecotr(lightVector))[0])
+
+    fo = fallOut(vecLen3D(l)) 
+    
+    v = fo*unitVector
+
+    return vecLen3D(v)
+
+CalculateDiffuse():
+    pass
+
+def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity): 
+    
     """
     Given in the assignment
     """
@@ -496,7 +517,7 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
     IP = np.matrix([5.0, 5.0, 5.0]).T
     
     # This is guesswork
-#    ID = np.matrix([5.0, 5.0, 5.0]).T
+    #ID = np.matrix([5.0, 5.0, 5.0]).T
 
     #Light Source Attenuation
 
@@ -518,7 +539,6 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
 
     #lightSrc = np.array(np.matrix([30,30,30])).T
     lightSrc = np.array(camera.center())
-   
     
     endPoint = np.array([
             (points[0][0]+points[0][1]+points[0][2]+points[0][3])/4,
@@ -526,20 +546,9 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
             (points[2][0]+points[2][1]+points[2][2]+points[2][3])/4
             ])
     
-    lightVector = np.array([
-            lightSrc[0]-endPoint[0],
-            lightSrc[1]-endPoint[1],
-            lightSrc[2]-endPoint[2]
-            ])
-  
-    ankl = RobustAngle3D(np.array(faceCorner_Normals.T[0]), np.array(normalizeVecotr(lightVector))[0])
-
-    fo = fallOut(vecLen3D(lightVector)) 
     
-    co = math.cos(ankl)**2    
-
-    intensity = fo*co*intensity
-
+    intensity = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals)
+    
     arr = np.ones((shadeRes,shadeRes))
     arr[:] = intensity
     
