@@ -581,12 +581,14 @@ def run(speed):
     capture = cv2.VideoCapture("Pattern6.mp4")
     #--------------------------------camera
     #capture = cv2.VideoCapture(0)
+    saveFrames = False
 
     image, isSequenceOK = getImageSequence(capture,speed)       
 
     if(isSequenceOK):
         update(image)
         printUsage()
+
 
     while(isSequenceOK):
         OriginalImage=copy(image)
@@ -670,9 +672,23 @@ def run(speed):
             
                 
         if inputKey == ord('s') or inputKey == ord('S'):
-            name='Saved Images/Frame_' + str(frameNumber)+'.png' 
-            cv2.imwrite(name,result)
-           
+            # name='Saved Images/Frame_' + str(frameNumber)+'.png'
+            # cv2.imwrite(name,result)
+
+            if((saveFrames)):
+                videoWriter.release()
+                saveFrames=False
+                print "End recording"
+            else:
+                imSize = np.shape(result)
+                videoWriter = cv2.VideoWriter("test.avi", cv.CV_FOURCC('D','I','V','3'), 15.0,(imSize[1],imSize[0]),True) #Make a video writer
+                saveFrames = True
+                print "Recording..."
+            if(saveFrames):
+                videoWriter.write(result)
+
+
+
         if (speed>0):
             update(image)
             image, isSequenceOK = getImageSequence(capture,speed)          
