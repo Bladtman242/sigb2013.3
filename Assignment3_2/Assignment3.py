@@ -298,29 +298,31 @@ def update(img):
                 if(drawTop):
                     ITop = cv2.imread("data/Images3/Top.jpg")
                     img = addTexMask(img,ITop,TopFace, camera)
+                    img=ShadeFace(img,TopFace,TopFaceCornerNormals,camera)
                 if(drawLeft):
                     ILeft = cv2.imread("data/Images3/Left.jpg")
                     img = addTexMask(img,ILeft,LeftFace, camera)
+                    img=ShadeFace(img,LeftFace,LeftFaceCornerNormals,camera)
                 if(drawRight):
                     IRight = cv2.imread("data/Images3/Right.jpg")
                     img = addTexMask(img,IRight,RightFace, camera)
+                    img=ShadeFace(img,RightFace,RightFaceCornerNormals,camera)
                 if(drawDown):
                     IDown = cv2.imread("data/Images3/Down.jpg")
                     img = addTexMask(img,IDown,DownFace, camera)
+                    img=ShadeFace(img,DownFace,DownFaceCornerNormals,camera)
                 if(drawUp):
                     IUp = cv2.imread("data/Images3/Up.jpg")
                     img = addTexMask(img,IUp,UpFace, camera)
+                    img=ShadeFace(img,UpFace,UpFaceCornerNormals,camera)
+
+                #Adds the texture to the surface with cv2 addWeighted method
                 # img = addTexWeighted(img,ITop,TopFace, camera)
                 # img = addTexWeighted(img,ILeft,LeftFace, camera)
                 # img = addTexWeighted(img,IRight,RightFace, camera)
                 # img = addTexWeighted(img,IDown,DownFace, camera)
                 # img = addTexWeighted(img,IUp,UpFace, camera)
 
-                img=ShadeFace(img,TopFace,TopFaceCornerNormals,camera)
-                img=ShadeFace(img,RightFace,RightFaceCornerNormals,camera)
-                img=ShadeFace(img,LeftFace,LeftFaceCornerNormals,camera)
-                img=ShadeFace(img,UpFace,UpFaceCornerNormals,camera)
-                img=ShadeFace(img,DownFace,DownFaceCornerNormals,camera)
 
             if ProjectPattern:
                 ''' <007> Here Test the camera matrix of the current view by projecting the pattern points'''
@@ -338,7 +340,6 @@ def update(img):
     cv2.imshow('Web cam', img)
     global result
     result=copy(img)
-
 
 def Angle3D(v1,v2):
     #vectot lengths
@@ -469,7 +470,7 @@ def ShadeFace(image,points,faceCorner_Normals, camera):
 
 def fallOut(x):
     # return 1/(0.03 * x**2 + 0*x + 0)
-    return 1
+    return 100
 
 def vecLen3D(x):
     return math.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
@@ -477,38 +478,59 @@ def vecLen3D(x):
 #l is the direction of the light source 
 #n is the normal to the surface at the point p
 # Where is ID? Where is IS?
-def CalculatePhongIlluminationModel(n,l,r,v,IA,IS,ID,KA,KS,KD):
-    #(IA*KA)+(ID*KD*max(n*l,0))
-    pass;
+def CalculatePhongIlluminationModel(I_ambient,I_diffuse,I_specular):
+    #I_ambient + I_diffuse #+I_glossy
+    IA = I_ambient
+    ID = I_diffuse
+    IS = I_specular
+    return (IA[0]+ID[0]+IS[0],IA[1]+ID[1]+IS[1],IA[2]+ID[2]+IS[2])
 
-def CalculateDiffuse(lightSrc, endPoint, faceCorner_Normals, kd):
+def CalculateDiffuse(lightVector, faceCorner_Normals, kd,IL):
 
-    lightVector = np.array([
-            lightSrc[0]-endPoint[0],
-            lightSrc[1]-endPoint[1],
-            lightSrc[2]-endPoint[2]
-            ])
 
     l = lightVector / vecLen3D(lightVector)
-     
-    #ankl = RobustAngle3D(np.array(faceCorner_Normals.T[0]), np.array(normalizeVecotr(lightVector))[0])
-
-    fo = fallOut(vecLen3D(lightVector))
+    l = l.T[0]
+    print "l",type(l), shape(l), l 
     
-    v = fo*l
-    print "fo", fo
-    print "v", v
+    n = faceCorner_Normals.T[0] 
+    n = n / vecLen3D(n)
+    
+    print "n",type(n), shape(n), n 
 
-    Ilx = vecLen3D(v)
+    print "dot", np.dot(n,l)
+    dot = max((np.dot(n, l)),0)
 
+    resultR = np.array((IL[0] * kd[0]) * dot)[0][0]
+    resultG = np.array((IL[1] * kd[1]) * dot)[0][0]
+    resultB = np.array((IL[2] * kd[2]) * dot)[0][0]
 
-    result = Ilx * max((np.dot(faceCorner_Normals.T[0], l)),0)
+    return (resultR,resultG,resultB)
 
-    return (kd[0]*result,kd[1]*result,kd[2]*result)
+def CalculateAmbient(IA, ka):
+    return (IA[0]*ka[0], IA[1]*ka[1], IA[2]*ka[2])
 
+def CalculateSpecular(IS,ks,cameraVector,norm):
+    # Iglossy(x)= Is*ks (r*v)^a
+    # v = L
+    # r = mirrorVector
+    
+    n = np.array(norm.T[0])
+    dot = np.dot(IS.T,ks)
+    a = 2
 
+    l = np.array(cameraVector)
+    l = l / vecLen3D(l)
 
-def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity): 
+    r = 2*(np.dot(n,l))
+    r = r*(np.subtract(n,l.T))
+
+    v = l 
+
+    result = np.array(np.array(IS)*np.array(ks)*(np.dot(r,v)**a))
+    print "result",shape(result),result
+    return (result[0],result[1],result[2])
+
+def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity):
     
     """
     Given in the assignment
@@ -520,9 +542,6 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
     #Point light IA=[IpR,IpG,IpB]
 
     IP = np.matrix([5.0, 5.0, 5.0]).T
-    
-    # This is guesswork
-    #ID = np.matrix([5.0, 5.0, 5.0]).T
 
     #Light Source Attenuation
 
@@ -530,11 +549,11 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
 
     #Material properties: e.g., Ka=[kaR; kaG; kaB]
 
-    ka=np.matrix([0.2, 0.2, 0.2]).T
+    ka= np.matrix([0.2, 0.2, 0.2]).T
 
     kd= np.matrix([0.3, 0.3, 0.3]).T
 
-    ks=np.matrix([0.7, 0.7, 0.7]).T
+    ks= np.matrix([0.7, 0.7, 0.7]).T
 
     alpha = 100
 
@@ -542,6 +561,7 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
     End - Given in the assignment
     """
 
+    
     #lightSrc = np.array(np.matrix([30,30,30])).T
     lightSrc = np.array(camera.center())
     
@@ -552,16 +572,32 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
             ])
     
     
-    (Ir,Ig,Ib) = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals, kd)
+    lightVector = np.array([
+            lightSrc[0]-endPoint[0],
+            lightSrc[1]-endPoint[1],
+            lightSrc[2]-endPoint[2]
+            ])
     
+    #(Ir,Ig,Ib) = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals, kd, IP)
+    #(IAmbientR,IAmbientG,IAmbientB) = CalculateAmbient(IA, ka)
+    
+    I_ambient = CalculateAmbient(IA, ka)
+    I_diffuse = CalculateDiffuse(lightVector,faceCorner_Normals, kd, IP)
+    I_specular = CalculateSpecular(IP,ks,lightVector,faceCorner_Normals)
+    
+    phong = CalculatePhongIlluminationModel(I_ambient,I_diffuse,I_specular)
     arrR = np.ones((shadeRes,shadeRes))
     arrG = np.ones((shadeRes,shadeRes))
     arrB = np.ones((shadeRes,shadeRes))
 
-    arrR[:] = Ir
-    arrG[:] = Ig
-    arrB[:] = Ib
-    
+    arrR[:] = phong[0]
+    arrG[:] = phong[1]
+    arrB[:] = phong[2]
+    """
+    arrR[:] = Ir + IAmbientR
+    arrG[:] = Ig + IAmbientG
+    arrB[:] = Ib + IAmbientB
+    """
     return (arrR, arrG, arrB)
 
 def run(speed): 
@@ -572,12 +608,14 @@ def run(speed):
     capture = cv2.VideoCapture("Pattern6.mp4")
     #--------------------------------camera
     #capture = cv2.VideoCapture(0)
+    saveFrames = False
 
     image, isSequenceOK = getImageSequence(capture,speed)       
 
     if(isSequenceOK):
         update(image)
         printUsage()
+
 
     while(isSequenceOK):
         OriginalImage=copy(image)
@@ -661,9 +699,23 @@ def run(speed):
             
                 
         if inputKey == ord('s') or inputKey == ord('S'):
-            name='Saved Images/Frame_' + str(frameNumber)+'.png' 
-            cv2.imwrite(name,result)
-           
+            # name='Saved Images/Frame_' + str(frameNumber)+'.png'
+            # cv2.imwrite(name,result)
+
+            if((saveFrames)):
+                videoWriter.release()
+                saveFrames=False
+                print "End recording"
+            else:
+                imSize = np.shape(result)
+                videoWriter = cv2.VideoWriter("test.avi", cv.CV_FOURCC('D','I','V','3'), 15.0,(imSize[1],imSize[0]),True) #Make a video writer
+                saveFrames = True
+                print "Recording..."
+            if(saveFrames):
+                videoWriter.write(result)
+
+
+
         if (speed>0):
             update(image)
             image, isSequenceOK = getImageSequence(capture,speed)          
