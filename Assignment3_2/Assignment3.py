@@ -333,16 +333,23 @@ def update(img):
                 # box = getCubePoints((0,0,0),2,2)
                 box_cam = camera.project(toHomogenious(box))
                 DrawLines(img,box_cam)
-    print Angle3D(np.array([0,0,3]),np.array([1,0,0]))
     cv2.imshow('Web cam', img)
     global result
     result=copy(img)
+
 
 def Angle3D(v1,v2):
     #vectot lengths
     # l1=np.sqrt(v1[0]**2 + v1[1]**2 + v1[2]**2)
     # l2=np.sqrt(v2[0]**2 + v2[1]**2 + v2[2]**2)
     ca = np.dot(v1,v2)
+    return acos(ca)*180/math.pi
+
+def RobustAngle3D(v1,v2):
+    #vectot lengths
+    l1=math.sqrt(v1[0]**2 + v1[1]**2 + v1[2]**2)
+    l2=math.sqrt(v2[0]**2 + v2[1]**2 + v2[2]**2)
+    ca = np.dot(v1,v2) / (l1 * l2)
     return acos(ca)*180/math.pi
 
 def getImageSequence(capture, fastForward):
@@ -396,7 +403,7 @@ def ShadeFace(image,points,faceCorner_Normals, camera):
 
 #................................
 
-    Mr0,Mg0,Mb0=CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals, camera)
+    Mr0,Mg0,Mb0=CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals, camera,255)
 
 # HINT
 
@@ -457,19 +464,70 @@ def ShadeFace(image,points,faceCorner_Normals, camera):
     image=cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
     return image
+
+def fallOut(x):
+    return 1/x**2
+
+def vecLen3D(x):
+    return math.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
+
+def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity): 
+
+    """
+    Given in the assignment
+    """
+    #Ambient light IA=[IaR,IaG,IaB]
+
+    IA = np.matrix([5.0, 5.0, 5.0]).T
+
+    #Point light IA=[IpR,IpG,IpB]
+
+    IP = np.matrix([5.0, 5.0, 5.0]).T
+
+    #Light Source Attenuation
+
+    fatt = 1
+
+    #Material properties: e.g., Ka=[kaR; kaG; kaB]
+
+    ka=np.matrix([0.2, 0.2, 0.2]).T
+
+    kd= np.matrix([0.3, 0.3, 0.3]).T
+
+    ks=np.matrix([0.7, 0.7, 0.7]).T
+
+    alpha = 100
+
+    """
+    End - Given in the assignment
+    """
+
+    lightSrc = np.array(camera.center())
+    
+    endPoint = np.array([
+            (points[0][0]+points[0][1]+points[0][2]+points[0][3])/4,
+            (points[1][0]+points[1][1]+points[1][2]+points[1][3])/4,
+            (points[2][0]+points[2][1]+points[2][2]+points[2][3])/4
+            ])
+    
+    lightVector = np.array([
+            lightSrc[0]-endPoint[0],
+            lightSrc[1]-endPoint[1],
+            lightSrc[2]-endPoint[2]
+            ])
   
-def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera): 
+    ankl = RobustAngle3D(np.array(faceCorner_Normals.T[0]), np.array(normalizeVecotr(lightVector))[0])
 
-    print "shadeRes", shadeRes
-    print "points", points
-    print "faceCorner_Normals", faceCorner_Normals
-    print "camera", camera
+    fo = fallOut(vecLen3D(lightVector)) 
+    
+    co = math.cos(ankl)**2    
 
-    red = np.zeros((shadeRes,shadeRes)) 
-    green = np.zeros((shadeRes,shadeRes)) 
-    blue = np.zeros((shadeRes,shadeRes)) 
+    intensity = fo*co*intensity
 
-    return (red,green,blue)
+    arr = np.ones((shadeRes,shadeRes))
+    arr[:] = intensity
+    
+    return (arr,np.copy(arr),np.copy(arr))
 
 def run(speed): 
     
