@@ -484,13 +484,8 @@ def CalculatePhongIlluminationModel(I_ambient,I_diffuse):
     ID = I_diffuse
     return (IA[0]+ID[0],IA[1]+ID[1],IA[2]+ID[2])
 
-def CalculateDiffuse(lightSrc, endPoint, faceCorner_Normals, kd,IL):
+def CalculateDiffuse(lightVector, faceCorner_Normals, kd,IL):
 
-    lightVector = np.array([
-            lightSrc[0]-endPoint[0],
-            lightSrc[1]-endPoint[1],
-            lightSrc[2]-endPoint[2]
-            ])
 
     l = lightVector / vecLen3D(lightVector)
     l = l.T[0]
@@ -513,8 +508,16 @@ def CalculateDiffuse(lightSrc, endPoint, faceCorner_Normals, kd,IL):
 def CalculateAmbient(IA, ka):
     return (IA[0]*ka[0], IA[1]*ka[1], IA[2]*ka[2])
 
+def CalculateSpecular(IS,ks,cameraVector):
+    # Iglossy(x)= Is*ks (r*v)^a
+    # v = L
+    # r = mirrorVector
+    
+    dot = np.dot(IS,ks)
+    a = Math.e
+    v = cameraVector
 
-
+    pass;
 
 def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity):
     
@@ -528,18 +531,18 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
     #Point light IA=[IpR,IpG,IpB]
 
     IP = np.matrix([5.0, 5.0, 5.0]).T
-    
+
     #Light Source Attenuation
 
     fatt = 1
 
     #Material properties: e.g., Ka=[kaR; kaG; kaB]
 
-    ka=np.matrix([0.2, 0.2, 0.2]).T
+    ka= np.matrix([0.2, 0.2, 0.2]).T
 
     kd= np.matrix([0.3, 0.3, 0.3]).T
 
-    ks=np.matrix([0.7, 0.7, 0.7]).T
+    ks= np.matrix([0.7, 0.7, 0.7]).T
 
     alpha = 100
 
@@ -547,6 +550,7 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
     End - Given in the assignment
     """
 
+    
     #lightSrc = np.array(np.matrix([30,30,30])).T
     lightSrc = np.array(camera.center())
     
@@ -557,7 +561,13 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
             ])
     
     
-    I_diffuse = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals, kd, IP)
+    lightVector = np.array([
+            lightSrc[0]-endPoint[0],
+            lightSrc[1]-endPoint[1],
+            lightSrc[2]-endPoint[2]
+            ])
+    
+    I_diffuse = CalculateDiffuse(lightVector,faceCorner_Normals, kd, IP)
     #(Ir,Ig,Ib) = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals, kd, IP)
     #(IAmbientR,IAmbientG,IAmbientB) = CalculateAmbient(IA, ka)
     
