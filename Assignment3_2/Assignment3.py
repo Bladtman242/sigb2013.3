@@ -12,6 +12,7 @@ from SIGBTools import *
 
 
 global cam1, firstView
+global IA,IP,ka,kd,ks
 
 def getCornerCoords(boardImg):
 
@@ -407,7 +408,7 @@ def ShadeFace(image,points,faceCorner_Normals, camera):
 
 #................................
 
-    Mr0,Mg0,Mb0=CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals, camera,255)
+    Mr0,Mg0,Mb0= CalculateShadeMatrix(points, faceCorner_Normals, camera)
 
 # HINT
 
@@ -491,14 +492,11 @@ def CalculateDiffuse(lightVector, faceCorner_Normals, kd,IL):
 
     l = lightVector / vecLen3D(lightVector)
     l = l.T[0]
-    print "l",type(l), shape(l), l 
     
     n = faceCorner_Normals.T[0] 
     n = n / vecLen3D(n)
     
-    print "n",type(n), shape(n), n 
 
-    print "dot", np.dot(n,l)
     dot = max((np.dot(n, l)),0)
 
     resultR = np.array((IL[0] * kd[0]) * dot)[0][0]
@@ -528,16 +526,57 @@ def CalculateSpecular(IS,ks,cameraVector,norm):
     v = l 
 
     result = np.array(np.array(IS)*np.array(ks)*(np.dot(r,v)**a))
-    print "result",shape(result),result
+
     return (result[0],result[1],result[2])
 
-def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity):
-    
+def ShadePhong(faceCorner_Normals, faceCenter, cornerPoint, camera):
+    globals()
+    arrR = np.ones((shadeRes,shadeRes))
+    arrG = np.ones((shadeRes,shadeRes))
+    arrB = np.ones((shadeRes,shadeRes))
+    for i in range(shadeRes):
+        for j in range(shadeRes):
+            x,y,z = BilinearInterpo(shadeRes,i,j,faceCorner_Normals,True)
+            norm = np.array([x,y,z])
+
+            #estimate lightvector
+            lightVector = EstimateLightVector(faceCenter, (i,j), cornerPoint, camera)
+
+            I_ambient = CalculateAmbient(IA, ka)
+            I_diffuse = CalculateDiffuse(lightVector, faceCorner_Normals, kd, IP)
+            I_specular = CalculateSpecular(IP, ks, lightVector, norm)
+            phong = CalculatePhongIlluminationModel(I_ambient,I_diffuse,I_specular)
+            arrR[i][j] = phong[0]
+            arrG[i][j] = phong[1]
+            arrB[i][j] = phong[2]
+    return (arrR, arrG, arrB)
+
+
+def EstimateLightVector(faceCenter, shapeResP, cornerPoint, camera):
+    #incremental vector
+    vect = (np.array(faceCenter)-np.array(cornerPoint))/5
+    incX,incY,incZ = vect
+
+    #2d point
+    x,y = shapeResP
+
+    #3d point
+    x2,y2,z2 = x*incX, y*incY, x*incZ
+    lightSrc = np.array(camera.center())
+    lightVector = np.array([
+            lightSrc[0]-x2,
+            lightSrc[1]-y2,
+            lightSrc[2]-z2
+            ])
+    return lightVector
+
+def CalculateShadeMatrix(points, faceCorner_Normals, camera):
     """
     Given in the assignment
     """
     #Ambient light IA=[IaR,IaG,IaB]
-
+    globals()
+    global IA,IP,ka,kd,ks
     IA = np.matrix([5.0, 5.0, 5.0]).T
 
     #Point light IA=[IpR,IpG,IpB]
@@ -572,37 +611,40 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
             (points[2][0]+points[2][1]+points[2][2]+points[2][3])/4
             ])
     
-    
-    lightVector = np.array([
+
+    global phongShade
+    if(phongShade):
+        cornerPoint = (points[0][0],points[0][1],points[0][2])
+        return ShadePhong(faceCorner_Normals, endPoint, cornerPoint, camera)
+    else:
+        lightVector = np.array([
             lightSrc[0]-endPoint[0],
             lightSrc[1]-endPoint[1],
             lightSrc[2]-endPoint[2]
             ])
-    
-    #(Ir,Ig,Ib) = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals, kd, IP)
-    #(IAmbientR,IAmbientG,IAmbientB) = CalculateAmbient(IA, ka)
-    
-    I_ambient = CalculateAmbient(IA, ka)
-    I_diffuse = CalculateDiffuse(lightVector,faceCorner_Normals, kd, IP)
-    I_specular = CalculateSpecular(IP,ks,lightVector,faceCorner_Normals)
-    
-    phong = CalculatePhongIlluminationModel(I_ambient,I_diffuse,I_specular)
-    arrR = np.ones((shadeRes,shadeRes))
-    arrG = np.ones((shadeRes,shadeRes))
-    arrB = np.ones((shadeRes,shadeRes))
+        (Ir,Ig,Ib) = CalculateDiffuse(lightVector,faceCorner_Normals, kd, IP)
+        (IAmbientR,IAmbientG,IAmbientB) = CalculateAmbient(IA, ka)
 
-    arrR[:] = phong[0]
-    arrG[:] = phong[1]
-    arrB[:] = phong[2]
-    """
-    arrR[:] = Ir + IAmbientR
-    arrG[:] = Ig + IAmbientG
-    arrB[:] = Ib + IAmbientB
-    """
-    return (arrR, arrG, arrB)
+        I_ambient = CalculateAmbient(IA, ka)
 
-def ShadePhong(faceCorner_Normals, point):
-    x,y,z = BilinearInterpo(10,point[0],point[1],faceCorner_Normals,True)
+        I_diffuse = CalculateDiffuse(lightVector,faceCorner_Normals, kd, IP)
+        I_specular = CalculateSpecular(IP,ks,lightVector,faceCorner_Normals)
+
+        phong = CalculatePhongIlluminationModel(I_ambient,I_diffuse,I_specular)
+
+        arrR = np.ones((shadeRes,shadeRes))
+        arrG = np.ones((shadeRes,shadeRes))
+        arrB = np.ones((shadeRes,shadeRes))
+
+        arrR[:] = phong[0]
+        arrG[:] = phong[1]
+        arrB[:] = phong[2]
+        """
+        arrR[:] = Ir + IAmbientR
+        arrG[:] = Ig + IAmbientG
+        arrB[:] = Ib + IAmbientB
+        """
+        return (arrR, arrG, arrB)
 
 
 def run(speed): 
@@ -614,7 +656,6 @@ def run(speed):
     #--------------------------------camera
     #capture = cv2.VideoCapture(0)
     saveFrames = False
-
     image, isSequenceOK = getImageSequence(capture,speed)       
 
     if(isSequenceOK):
@@ -624,7 +665,7 @@ def run(speed):
 
     while(isSequenceOK):
         OriginalImage=copy(image)
-         
+
         
         inputKey = cv2.waitKey(1)
         
@@ -666,6 +707,11 @@ def run(speed):
             else:
                 WireFrame = True;
             update(OriginalImage)
+        if inputKey == ord('f') or inputKey == ord('F'):
+            global phongShade
+            phongShade = True
+            if phongShade:
+                phongShade = False
 
         if inputKey == ord('i') or inputKey == ord('I'):
             global ShowText
@@ -707,17 +753,20 @@ def run(speed):
             # name='Saved Images/Frame_' + str(frameNumber)+'.png'
             # cv2.imwrite(name,result)
 
+
             if((saveFrames)):
                 videoWriter.release()
                 saveFrames=False
                 print "End recording"
             else:
                 imSize = np.shape(result)
-                videoWriter = cv2.VideoWriter("test.avi", cv.CV_FOURCC('D','I','V','3'), 15.0,(imSize[1],imSize[0]),True) #Make a video writer
+                videoWriter = cv2.VideoWriter("shade.avi", cv.CV_FOURCC('D','I','V','3'), 15.0,(imSize[1],imSize[0]),True) #Make a video writer
                 saveFrames = True
                 print "Recording..."
-            if(saveFrames):
-                videoWriter.write(result)
+        if(saveFrames):
+            videoWriter.write(result)
+            videoWriter.write(result)
+
 
 
 
@@ -734,7 +783,7 @@ global homographyPoints
 global calibrationPoints
 global calibrationCamera
 global chessSquare_size
-    
+global phongShade
 ProcessFrame=False
 Undistorting=False   
 WireFrame=False
@@ -742,6 +791,7 @@ ShowText=True
 TextureMap=True
 ProjectPattern=False
 debug=True
+phongShade = True
 
 frameNumber=0
 
