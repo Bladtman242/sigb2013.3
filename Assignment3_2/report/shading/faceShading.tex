@@ -14,4 +14,16 @@ defines a homography from the texture to the projected points, meaning that
 we can go from real world to 2D. In the next section three matrices for red,
 green and blue channels respectively is set by our CalculateShadeMatrix
 function. Next section applies the intensity values as a texture on top of the
-image 
+image using the cv2 method warpperspective and the homography estimated
+earlier. Next section simply converts the image from BGR 2 RGB and
+extracts each colour channel with the cv2 split method. The next section first
+creates a copy of one of the channel images. Next it set's them all to 0 to
+create a mask that will be affected only by the points within the face. This
+is done by taking our previously projected points and fill the polygon they
+make up with the value 255. This is done with the cv2 method
+fillconvexpoly, for speed most likely. The next uses this mask of the face to
+first index each channel and perform a map on these values. The mapping
+function multiplies the value of the original colour channels with the
+overlay channels and applies normalization in the range of 0 to 255. The next
+and final section stitches the channels back together to form a complete image
+and transforms it back to BGR.
