@@ -114,8 +114,8 @@ def getCameraMethod2(currentFrame, distortCoefs):
         rvecs_new, tvecs_new = GetObjectPos(obj_points,imPoints,K,distortCoefs)
         found = True;
 
-    if(not found):
-        return None
+    #if(not found):
+    #    return None
     rvecs_new = cv2.Rodrigues(np.array(rvecs_new))[0]
     return Camera(np.dot(K, np.hstack((rvecs_new, tvecs_new))))
 
@@ -319,10 +319,14 @@ def update(img):
                 # img = addTexWeighted(img,IUp,UpFace, camera)
 
                 img=ShadeFace(img,TopFace,TopFaceCornerNormals,camera)
+                img=ShadeFace(img,RightFace,RightFaceCornerNormals,camera)
+                img=ShadeFace(img,LeftFace,LeftFaceCornerNormals,camera)
+                img=ShadeFace(img,UpFace,UpFaceCornerNormals,camera)
+                img=ShadeFace(img,DownFace,DownFaceCornerNormals,camera)
 
             if ProjectPattern:
                 ''' <007> Here Test the camera matrix of the current view by projecting the pattern points'''
-                points = toHomogenious(np.array(np.load("numpyData/obj_points.npy"))[0].T)
+                points = toHomogenious(np.array(np.load("data/numpyData/obj_points.npy"))[0].T)
                 projected_points = camera.project(points)
                 for point in projected_points.T:
                     cv2.circle(img,(int(point[0,0]),int(point[0,1])),5,(255,255,0),2)
@@ -474,7 +478,8 @@ def vecLen3D(x):
 #l is the direction of the light source 
 #n is the normal to the surface at the point p
 # Where is ID? Where is IS?
-def CalculatePhongIlluminationModel(IA,KA,ID,KD,n,l,IS,KS):
+def CalculatePhongIlluminationModel(n,l,r,v,IA,IS,ID,KA,KS,KD):
+    #(IA*KA)+(ID*KD*max(n*l,0))
     pass;
 
 def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity): 
@@ -491,7 +496,7 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
     IP = np.matrix([5.0, 5.0, 5.0]).T
     
     # This is guesswork
-    ID = np.matrix([5.0, 5.0, 5.0]).T
+#    ID = np.matrix([5.0, 5.0, 5.0]).T
 
     #Light Source Attenuation
 
@@ -511,7 +516,9 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
     End - Given in the assignment
     """
 
+    #lightSrc = np.array(np.matrix([30,30,30])).T
     lightSrc = np.array(camera.center())
+   
     
     endPoint = np.array([
             (points[0][0]+points[0][1]+points[0][2]+points[0][3])/4,
@@ -727,7 +734,7 @@ cam1.factor()
 ''' <003> Here Load the first view image (01.png) and find the chess pattern and store the 4 corners of the pattern needed for homography estimation''' 
 firstView = cv2.imread("01.png")
 
-# points = toHomogenious(np.array(np.load("numpyData/obj_points.npy"))[0].T)
+# points = toHomogenious(np.array(np.load("data/numpyData/obj_points.npy"))[0].T)
 # projected_points = cam1.project(points)
 
 # for point in projected_points.T:
