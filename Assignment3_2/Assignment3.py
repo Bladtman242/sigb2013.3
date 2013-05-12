@@ -226,7 +226,7 @@ def update(img):
     globals()
     Undistorting = True;
     if Undistorting:  #Use previous stored camera matrix and distortion coefficient to undistort the image
-        distortC = np.load("numpyData/distortionCoefficient.npy")
+        distortC = np.load("data/numpyData/distortionCoefficient.npy")
         image = cv2.undistort(img, cameraMat, distortC)
     
     if (ProcessFrame):
@@ -704,9 +704,9 @@ DownFace = box[i,j]
 # RecordVideoFromCamera()
 
 ''' <001> Here Load the numpy data files saved by the cameraCalibrate2''' 
-cameraMat  = np.load("numpyData/camera_matrix.npy")
-roVectors = np.load("numpyData/rotatioVectors.npy")
-transVectors  = np.load("numpyData/translationVectors.npy")
+cameraMat  = np.load("data/numpyData/camera_matrix.npy")
+roVectors = np.load("data/numpyData/rotatioVectors.npy")
+transVectors  = np.load("data/numpyData/translationVectors.npy")
 
 ''' <002> Here Define the camera matrix of the first view image (01.png) recorded by the cameraCalibrate2''' 
 
