@@ -1,1 +1,9 @@
 \subsection{Flat shading}
+
+Flat shading is a computationally cheap way of achieving a shading effect of an
+object in a 3D image. The theory behind is that each polygon gets the same
+intensity value added to every pixel. Provided enough rasterization, it can
+give a decent result, but the main advantage of flat shading compared to more
+advanced methods like Phong and Gouraud shading is the smaller faster computations. 
+
+The result of flat shading is dependant on the position of the light source with respect to the object, but the surface is assumed to be diffuse reflector, and as such the entire polygon will get the same amount of intensity added. 
