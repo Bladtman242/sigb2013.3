@@ -298,29 +298,31 @@ def update(img):
                 if(drawTop):
                     ITop = cv2.imread("data/Images3/Top.jpg")
                     img = addTexMask(img,ITop,TopFace, camera)
+                    img=ShadeFace(img,TopFace,TopFaceCornerNormals,camera)
                 if(drawLeft):
                     ILeft = cv2.imread("data/Images3/Left.jpg")
                     img = addTexMask(img,ILeft,LeftFace, camera)
+                    img=ShadeFace(img,LeftFace,LeftFaceCornerNormals,camera)
                 if(drawRight):
                     IRight = cv2.imread("data/Images3/Right.jpg")
                     img = addTexMask(img,IRight,RightFace, camera)
+                    img=ShadeFace(img,RightFace,RightFaceCornerNormals,camera)
                 if(drawDown):
                     IDown = cv2.imread("data/Images3/Down.jpg")
                     img = addTexMask(img,IDown,DownFace, camera)
+                    img=ShadeFace(img,DownFace,DownFaceCornerNormals,camera)
                 if(drawUp):
                     IUp = cv2.imread("data/Images3/Up.jpg")
                     img = addTexMask(img,IUp,UpFace, camera)
+                    img=ShadeFace(img,UpFace,UpFaceCornerNormals,camera)
+
+                #Adds the texture to the surface with cv2 addWeighted method
                 # img = addTexWeighted(img,ITop,TopFace, camera)
                 # img = addTexWeighted(img,ILeft,LeftFace, camera)
                 # img = addTexWeighted(img,IRight,RightFace, camera)
                 # img = addTexWeighted(img,IDown,DownFace, camera)
                 # img = addTexWeighted(img,IUp,UpFace, camera)
 
-                img=ShadeFace(img,TopFace,TopFaceCornerNormals,camera)
-                img=ShadeFace(img,RightFace,RightFaceCornerNormals,camera)
-                img=ShadeFace(img,LeftFace,LeftFaceCornerNormals,camera)
-                img=ShadeFace(img,UpFace,UpFaceCornerNormals,camera)
-                img=ShadeFace(img,DownFace,DownFaceCornerNormals,camera)
 
             if ProjectPattern:
                 ''' <007> Here Test the camera matrix of the current view by projecting the pattern points'''
@@ -338,7 +340,6 @@ def update(img):
     cv2.imshow('Web cam', img)
     global result
     result=copy(img)
-
 
 def Angle3D(v1,v2):
     #vectot lengths
@@ -507,9 +508,15 @@ def CalculateDiffuse(lightSrc, endPoint, faceCorner_Normals, kd,IL):
 
     return (resultR,resultG,resultB)
 
+def CalculateAmbient(IA, KA):
+    result = IA * KA.T
+    print "ambient", result
+    return (result[0], result[1], result[2])
 
 
-def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity): 
+
+
+def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensity):
     
     """
     Given in the assignment
@@ -554,14 +561,15 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
     
     
     (Ir,Ig,Ib) = CalculateDiffuse(lightSrc, endPoint,faceCorner_Normals, kd, IP)
+    (IAmbientR,IAmbientG,IAmbientB) = CalculateAmbient(IA, ka)
     
     arrR = np.ones((shadeRes,shadeRes))
     arrG = np.ones((shadeRes,shadeRes))
     arrB = np.ones((shadeRes,shadeRes))
 
-    arrR[:] = Ir
-    arrG[:] = Ig
-    arrB[:] = Ib
+    arrR[:] = Ir + IAmbientR
+    arrG[:] = Ig + IAmbientG
+    arrB[:] = Ib + IAmbientB
     
     return (arrR, arrG, arrB)
 
