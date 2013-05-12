@@ -384,6 +384,7 @@ def ShadeFace(image,points,faceCorner_Normals, camera):
 
     videoHeight, videoWidth, vd = array(image).shape
 
+
 #................................
 
     points_Proj=camera.project(toHomogenious(points))
@@ -599,6 +600,10 @@ def CalculateShadeMatrix(image,shadeRes,points,faceCorner_Normals,camera,intensi
     arrB[:] = Ib + IAmbientB
     """
     return (arrR, arrG, arrB)
+
+def ShadePhong(faceCorner_Normals, point):
+    x,y,z = BilinearInterpo(10,point[0],point[1],faceCorner_Normals,True)
+
 
 def run(speed): 
     
