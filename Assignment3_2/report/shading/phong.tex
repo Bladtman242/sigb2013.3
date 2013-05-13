@@ -1,7 +1,7 @@
 \subsection{Phong shading}
-Flat shading is a little brutal, especially with respect to specularity. If a
-surface has large specular areas they will either be ignored, or define the
-intensity of the entire surface. Phong illumination corrects this problem.
+While vastly improving on flat shading, Gouraud shading doesn't handle specular
+areas very well. If a surface has large specular areas, absent from the
+vertices, they will be ignored. Phong illumination corrects this problem.
 
 \begin{figure}[hbt]
 	\centering
@@ -12,21 +12,12 @@ intensity of the entire surface. Phong illumination corrects this problem.
 \ref{fig:phongInterpo}
 \end{figure}
 
-By interpolating the vertex normals across the polygon surface (figure
-\ref{fig:phongInterpo}), Phong shading finds a smoothly shifting normal for each
-pixel. This normal is then used in the illumination/reflection model, to find
-the final intensity weight for that pixel. This will give a much more realistic
-result that flat shading, at the expense of interpolating normals and applying
-the lighting model for each surface pixel. Figure \ref{fig:fVsP} illustrates
-both the improved colour realism (the sphere actually looks spherical), and the
-difference in specularity, being completely invisible in the example using flat
-shading.
-
-\begin{figure}[htb]
-	\centering
-	\scalebox{0.7}
-	{\includegraphics{pics/flatVsPhong.png}}
-	\caption{flat vs Phong shading}
-	\label{fig:fVsP}
-\ref{fig:phongInterpo}
-\end{figure}
+Phong shading works much like Gouraud shading, but rather than interpolating
+vertex intensities, the vertex normals are interpolated across the polygon
+surface (figure \ref{fig:phongInterpo}), finding a smoothly shifting
+normal for each pixel. This normal is then used in the illumination/reflection
+model, to find the final intensity weight for that pixel. This will give a more
+realistic result that Gouraud shading, at the expense of interpolating normals and
+applying the lighting model for each surface pixel. Figure \ref{fig:fVsP}
+illustrates the difference in specularity, being quite diffuse in the example
+using Gouraud shading, and completely invisible with flat shading.
