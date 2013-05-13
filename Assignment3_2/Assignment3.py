@@ -372,6 +372,7 @@ def printUsage():
     print "p: turning the processing on/off "  
     print 'u: undistorting the image'
     print 'i: show info'
+    print 'f: toggle between flat and Phong shading'
     print 't: texture map'
     print 'g: project the pattern using the camera matrix (test)'
     print 's: record a video file'
@@ -483,8 +484,8 @@ def CalculatePhongIlluminationModel(I_ambient,I_diffuse,I_specular):
     IA = I_ambient
     ID = I_diffuse
     IS = I_specular
-    # return (IA[0]+ID[0]+IS[0],IA[1]+ID[1]+IS[1],IA[2]+ID[2]+IS[2])
-    return (ID[0],ID[1],ID[2])
+    return (IA[0]+ID[0]+IS[0],IA[1]+ID[1]+IS[1],IA[2]+ID[2]+IS[2])
+
 
 def CalculateDiffuse(lightVector, faceCorner_Normals, kd,IL):
 
@@ -719,10 +720,13 @@ def run(speed):
             update(OriginalImage)
         if inputKey == ord('f') or inputKey == ord('F'):
             global phongShade
-            phongShade = True
             if phongShade:
                 phongShade = False
-
+                print "using flat shading"
+            else:
+                phongShade = True
+                print "using phong shading"
+            update(OriginalImage)
         if inputKey == ord('i') or inputKey == ord('I'):
             global ShowText
             if ShowText:     
