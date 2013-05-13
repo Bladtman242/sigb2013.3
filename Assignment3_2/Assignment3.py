@@ -483,8 +483,8 @@ def CalculatePhongIlluminationModel(I_ambient,I_diffuse,I_specular):
     IA = I_ambient
     ID = I_diffuse
     IS = I_specular
-    # return (IA[0]+ID[0]+IS[0],IA[1]+ID[1]+IS[1],IA[2]+ID[2]+IS[2])
-    return (ID[0],ID[1],ID[2])
+    return (IA[0]+ID[0]+IS[0],IA[1]+ID[1]+IS[1],IA[2]+ID[2]+IS[2])
+
 
 def CalculateDiffuse(lightVector, faceCorner_Normals, kd,IL):
 
