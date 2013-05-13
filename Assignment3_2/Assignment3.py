@@ -372,6 +372,7 @@ def printUsage():
     print "p: turning the processing on/off "  
     print 'u: undistorting the image'
     print 'i: show info'
+    print 'f: toggle between flat and Phong shading'
     print 't: texture map'
     print 'g: project the pattern using the camera matrix (test)'
     print 's: record a video file'
@@ -719,10 +720,13 @@ def run(speed):
             update(OriginalImage)
         if inputKey == ord('f') or inputKey == ord('F'):
             global phongShade
-            phongShade = True
             if phongShade:
                 phongShade = False
-
+                print "using flat shading"
+            else:
+                phongShade = True
+                print "using phong shading"
+            update(OriginalImage)
         if inputKey == ord('i') or inputKey == ord('I'):
             global ShowText
             if ShowText:     
