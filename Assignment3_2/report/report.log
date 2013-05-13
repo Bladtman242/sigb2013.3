@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2013.4.22)  13 MAY 2013 19:13
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2013.4.22)  13 MAY 2013 19:41
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -667,57 +667,61 @@ File: pics/EstimatedLight.png Graphic file (type png)
 <use pics/EstimatedLight.png>
 Package pdftex.def Info: pics/EstimatedLight.png used on input line 16.
 (pdftex.def)             Requested size: 345.0pt x 298.08337pt.
- [7 <./pics/boxCenterLightVector.png>] [8 <./pics/EstimatedLight.png>] <pics/ph
-ongDiffuseOnly.png, id=116, 851.18pt x 722.7pt>
+LaTeX Font Info:    Font shape `OMS/cmr/bx/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/b/n' tried instead on input line 22.
+
+<pics/phongDiffuseOnly.png, id=106, 851.18pt x 722.7pt>
 File: pics/phongDiffuseOnly.png Graphic file (type png)
 
 <use pics/phongDiffuseOnly.png>
 Package pdftex.def Info: pics/phongDiffuseOnly.png used on input line 28.
 (pdftex.def)             Requested size: 345.0pt x 292.92348pt.
 )) (./our_findings/main.tex
-<pics/wireframe.png, id=117, 806.01125pt x 475.7775pt>
+<pics/wireframe.png, id=107, 806.01125pt x 475.7775pt>
 File: pics/wireframe.png Graphic file (type png)
 
 <use pics/wireframe.png>
 Package pdftex.def Info: pics/wireframe.png used on input line 5.
 (pdftex.def)             Requested size: 345.0pt x 203.65108pt.
- [9 <./pics/phongDiffuseOnly.png>]
 
-LaTeX Warning: Reference `fig:wirefram_old' on page 10 undefined on input line 
-12.
 
-<pics/wireframeOld.png, id=124, 683.55376pt x 541.02126pt>
+LaTeX Warning: Reference `fig:wirefram_old' on page 7 undefined on input line 1
+2.
+
+[7 <./pics/boxCenterLightVector.png>] [8 <./pics/EstimatedLight.png>] [9 <./pic
+s/phongDiffuseOnly.png>]
+<pics/wireframeOld.png, id=126, 683.55376pt x 541.02126pt>
 File: pics/wireframeOld.png Graphic file (type png)
 
 <use pics/wireframeOld.png>
 Package pdftex.def Info: pics/wireframeOld.png used on input line 16.
 (pdftex.def)             Requested size: 345.0pt x 273.0691pt.
- <pics/grid.png, id=127, 660.4675pt x 472.76625pt>
+ <pics/grid.png, id=129, 660.4675pt x 472.76625pt>
 File: pics/grid.png Graphic file (type png)
 
 <use pics/grid.png>
 Package pdftex.def Info: pics/grid.png used on input line 25.
 (pdftex.def)             Requested size: 345.0pt x 246.95801pt.
- <pics/gridOld.png, id=128, 550.055pt x 413.545pt>
+ <pics/gridOld.png, id=130, 550.055pt x 413.545pt>
 File: pics/gridOld.png Graphic file (type png)
 
 <use pics/gridOld.png>
 Package pdftex.def Info: pics/gridOld.png used on input line 31.
 (pdftex.def)             Requested size: 345.0pt x 259.38626pt.
- <pics/noCulling.png, id=130, 668.4975pt x 437.635pt>
+ <pics/noCulling.png, id=132, 668.4975pt x 437.635pt>
 File: pics/noCulling.png Graphic file (type png)
 
 <use pics/noCulling.png>
 Package pdftex.def Info: pics/noCulling.png used on input line 40.
 (pdftex.def)             Requested size: 345.0pt x 225.862pt.
 
-<pics/withCulling.png, id=133, 580.1675pt x 325.215pt>
+<pics/withCulling.png, id=135, 580.1675pt x 325.215pt>
 File: pics/withCulling.png Graphic file (type png)
 
 <use pics/withCulling.png>
 Package pdftex.def Info: pics/withCulling.png used on input line 52.
 (pdftex.def)             Requested size: 345.0pt x 193.39366pt.
- <pics/flat1.png, id=135, 600.2425pt x 389.455pt>
+ <pics/flat1.png, id=137, 600.2425pt x 389.455pt>
 File: pics/flat1.png Graphic file (type png)
 
 <use pics/flat1.png>
@@ -728,7 +732,7 @@ Package pdftex.def Info: pics/flat1.png used on input line 63.
 LaTeX Warning: Reference `flatRedAmbient' on page 10 undefined on input line 70
 .
 
-<pics/flatRedAmbient.png, id=136, 484.81125pt x 303.1325pt>
+<pics/flatRedAmbient.png, id=138, 484.81125pt x 303.1325pt>
 File: pics/flatRedAmbient.png Graphic file (type png)
 
 <use pics/flatRedAmbient.png>
@@ -739,7 +743,7 @@ Package pdftex.def Info: pics/flatRedAmbient.png used on input line 75.
 LaTeX Warning: Reference `fig:phongSpecularShadig' on page 10 undefined on inpu
 t line 84.
 
-<pics/phongShading.png, id=138, 846.16125pt x 720.6925pt>
+<pics/phongShading.png, id=140, 846.16125pt x 720.6925pt>
 File: pics/phongShading.png Graphic file (type png)
 
 <use pics/phongShading.png>
@@ -748,7 +752,7 @@ Package pdftex.def Info: pics/phongShading.png used on input line 86.
  [10 <./pics/wireframe.png>] [11 <./pics/wireframeOld.png>] [12 <./pics/grid.pn
 g>] [13 <./pics/gridOld.png>] [14 <./pics/noCulling.png> <./pics/withCulling.pn
 g>] [15 <./pics/flat1.png> <./pics/flatRedAmbient.png>] <pics/phongSpecularShad
-ing.png, id=173, 1280.785pt x 726.715pt>
+ing.png, id=174, 1280.785pt x 726.715pt>
 File: pics/phongSpecularShading.png Graphic file (type png)
 
 <use pics/phongSpecularShading.png>
@@ -773,14 +777,15 @@ LaTeX Warning: There were multiply-defined labels.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 76.
  ) 
 Here is how much of TeX's memory you used:
- 7876 strings out of 493488
- 107258 string characters out of 3141326
- 188850 words of memory out of 3000000
- 11002 multiletter control sequences out of 15000+200000
- 8025 words of font info for 31 fonts, out of 3000000 for 9000
+ 7879 strings out of 493488
+ 107295 string characters out of 3141326
+ 189026 words of memory out of 3000000
+ 11004 multiletter control sequences out of 15000+200000
+ 8280 words of font info for 32 fonts, out of 3000000 for 9000
  957 hyphenation exceptions out of 8191
- 29i,7n,28p,726b,422s stack positions out of 5000i,500n,10000p,200000b,50000s
-</usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmbsy
+ 29i,7n,28p,1065b,422s stack positions out of 5000i,500n,10000p,200000b,50000s
+</usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmbsy10.pf
+b></usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmbsy
 9.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10
 .pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.
 pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pf
@@ -788,10 +793,10 @@ b></usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb
 ></usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb><
 /usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></u
 sr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
-Output written on report.pdf (18 pages, 8302951 bytes).
+Output written on report.pdf (18 pages, 8312365 bytes).
 PDF statistics:
- 224 PDF objects out of 1000 (max. 8388607)
- 177 compressed objects within 2 object streams
+ 228 PDF objects out of 1000 (max. 8388607)
+ 180 compressed objects within 2 object streams
  45 named destinations out of 1000 (max. 500000)
  164 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -7,26 +7,26 @@ As our 2d coordinate system in this case is 10x10  each surface determines the v
 \begin{figure}[!htbp]
     \includegraphics{pics/boxCenterLightVector.png}
     \label{fig:BoxCenter}
-    \caption{Using the surface center as the impact point of the light for all surface pixels}
+    \caption{\textbf{Using the surface center as the impact point of the light for all surface pixels.} Using the box center as the impact point is evidently producing a less satisfying result - not showing much of the specular (white) reflections. This means, that the only effect we get from the added specular lighting to our Phong illumination model is some color changes. The color of the reflectiongs from an object can easily be changed by changing the parameters of the lightsource, but in this case we think its a bug. The color object should ideally not be changed as much as we see in the picture compared to the diffuse-only picture (see below)}
 \end{figure}
 
-Using the box center as the impact point is clearly producing a less satisfying result, not showing much of the specular (white) reflections. In this case it means, that the only effect we get from the added specular lighting to our Phong illumination model is some color changes. The color of the reflectiongs from an object can easily be changed by changing the parameters of the lightsource, but in this case we think its a bug. The color object should ideally not be changed as much as we see in the picture compared to the diffuse-only picture (see below)
+
 
 \begin{figure}[!htbp]
     \includegraphics{pics/EstimatedLight.png}
     \label{fig:EstimatedImpactPoint}
-    \caption{Using our impact point estimation}
+    \caption{\textbf{Using our impact point estimation.}
+     The result is better, but far from perfect using our estimated point-of-impact. Getting the correct point in the world coordinates has a huge impact of the realism on the specular lighting, and we're still far from that result. It is an improvement though, over using the surface center as seen in the image above. Some of the specular reflection highlight are shown in with this method, and furthermore shown in the area pointing towards our lightsource. More highlight shine through on surfaces pointing away from our lightsource which is not meant to happen, but we contribute that to two factors:
+\textbf{• The estimation contains errors on each surface}
+\textbf{• The light source is placed at the camera center, the placement of which is also estimated and not completly reliable.}
+All in all a result that leave us with a lot of room for improvements.}
 \end{figure}
 
-The result is better, but far from perfect using our estimated point-of-impact. Getting the correct point in the world coordinates has a huge impact of the realism on the specular lighting, and we're still far from that result. It is an improvement though, over using the surface center as seen in the image above. Some of the specular reflection highlight are shown in with this method, and furthermore shown in the area pointing towards our lightsource. More highlight shine through on surfaces pointing away from our lightsource which is not meant to happen, but we contribute that to two factors:
-\begin{itemize}
-	\item{Our estimation contains errors on each surface}
-	\item{The lightsource is placed at the camera center, the placement of which is also estimated and not completly reliable}
-\end{itemize}
-All in all a result that leave us with a lot of room for improvements.
+
+
 \begin{figure}[!htbp]
     \includegraphics{pics/phongDiffuseOnly.png}
     \label{fig:EphongDiffuseOnly}
-    \caption{Using phong light model and interpolated shading, but showing diffuse surface light only.}
+    \caption{\textbf{Using phong light model and interpolated shading, but showing diffuse surface light only.} 
+    This image shows the color degrading in the other images as the result of the added specular lighting. Note that the result here using only the diffuse light, seems more fitting as it matches the original lighting in the video a bit better. }
 \end{figure}
-This image clealy shows the color degrading in the other images as the result of the added specular lighting. Note that the result here using only the diffuse light, seems more fitting as it matches the original lighting in the video a bit better. 
