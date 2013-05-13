@@ -10,3 +10,12 @@ With flat shading, one surface normal is assumed for each polygon, usually the
 normal at the center of the surface, or an average of the vertex normals. This
 one normal is then used in the lighting model, and the resulting intensity
 applied to the entire surface.
+
+The result of flat shading is dependant on the position of the light
+source with respect to the object, but the surface is assumed to be
+diffuse reflector, and as such the entire polygon will get the same amount of
+intensity added. The intensity itself is calculated with the phong
+illumination model calculated for the center of each face. The flat
+shading assumes some facts about the setup, namely that both viewer and light
+source is far enough away from the object so that the illumination can be
+spread evenly (or constant) througout the entire face.
