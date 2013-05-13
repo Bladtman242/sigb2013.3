@@ -374,7 +374,8 @@ def printUsage():
     print 'i: show info'
     print 't: texture map'
     print 'g: project the pattern using the camera matrix (test)'
-    print 's: save frame'
+    print 's: record a video file'
+    print 'e: use estimated lightVector (or use box side center)'
     print 'x: do something!'
 
 def ShadeFace(image,points,faceCorner_Normals, camera):
@@ -526,7 +527,7 @@ def CalculateSpecular(IS,ks,cameraVector,norm):
 
     return (result[0],result[1],result[2])
 
-def ShadePhong(faceCorner_Normals, faceCenter, cornerPoint, camera):
+def ShadePhong(faceCorner_Normals, faceCenter, cornerPoint, camera, lightVector):
     globals()
     arrR = np.ones((shadeRes,shadeRes))
     arrG = np.ones((shadeRes,shadeRes))
@@ -536,8 +537,9 @@ def ShadePhong(faceCorner_Normals, faceCenter, cornerPoint, camera):
             x,y,z = BilinearInterpo(shadeRes,i,j,faceCorner_Normals,True)
             norm = np.array([x,y,z])
 
-            #estimate lightvector
-            lightVector = EstimateLightVector(faceCenter, (i,j), cornerPoint, camera)
+            if EstimatedVector:
+                #estimate lightvector
+                lightVector = EstimateLightVector(faceCenter, (i,j), cornerPoint, camera)
 
             I_ambient = CalculateAmbient(IA, ka)
             I_diffuse = CalculateDiffuse(lightVector, faceCorner_Normals, kd, IP)
@@ -558,7 +560,7 @@ def EstimateLightVector(faceCenter, shapeResP, cornerPoint, camera):
     x,y = shapeResP
 
     #3d point
-    x2,y2,z2 = x*incX, y*incY, x*incZ
+    x2,y2,z2 = cornerPoint[0]+ x*incX, cornerPoint[1]+ y*incY, cornerPoint[2] + x*incZ
     lightSrc = np.array(camera.center())
     lightVector = np.array([
             lightSrc[0]-x2,
@@ -607,18 +609,17 @@ def CalculateShadeMatrix(points, faceCorner_Normals, camera):
             (points[1][0]+points[1][1]+points[1][2]+points[1][3])/4,
             (points[2][0]+points[2][1]+points[2][2]+points[2][3])/4
             ])
-    
+    lightVector = np.array([
+        lightSrc[0]-endPoint[0],
+        lightSrc[1]-endPoint[1],
+        lightSrc[2]-endPoint[2]
+        ])
 
     global phongShade
     if(phongShade):
         cornerPoint = (points[0][0],points[0][1],points[0][2])
-        return ShadePhong(faceCorner_Normals, endPoint, cornerPoint, camera)
+        return ShadePhong(faceCorner_Normals, endPoint, cornerPoint, camera, lightVector)
     else:
-        lightVector = np.array([
-            lightSrc[0]-endPoint[0],
-            lightSrc[1]-endPoint[1],
-            lightSrc[2]-endPoint[2]
-            ])
         (Ir,Ig,Ib) = CalculateDiffuse(lightVector,faceCorner_Normals, kd, IP)
         (IAmbientR,IAmbientG,IAmbientB) = CalculateAmbient(IA, ka)
 
@@ -695,7 +696,18 @@ def run(speed):
                 Undistorting = False;
             else:
                 Undistorting = True;
-            update(OriginalImage)     
+            update(OriginalImage)
+
+        if inputKey == ord('e') or inputKey == ord('E'):
+            global EstimatedVector
+            if EstimatedVector:
+                EstimatedVector = False;
+                print "Using box center as lightvector."
+            else:
+                EstimatedVector = True;
+                print "Using estimated lightvector."
+            update(OriginalImage)
+
         if inputKey == ord('w') or inputKey == ord('W'):
             global WireFrame
             if WireFrame:     
@@ -781,6 +793,7 @@ global calibrationPoints
 global calibrationCamera
 global chessSquare_size
 global phongShade
+global EstimatedVector
 ProcessFrame=False
 Undistorting=False   
 WireFrame=False
@@ -789,6 +802,7 @@ TextureMap=True
 ProjectPattern=False
 debug=True
 phongShade = True
+EstimatedVector = False
 
 frameNumber=0
 

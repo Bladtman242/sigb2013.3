@@ -4,4 +4,4 @@
 \contentsline {section}{\numberline {3}Augmented Cube}{3}{section.3}
 \contentsline {subsection}{\numberline {3.1}Method one, using homography}{3}{subsection.3.1}
 \contentsline {subsection}{\numberline {3.2}Method two, direct calculation}{3}{subsection.3.2}
-\contentsline {section}{\numberline {4}Back-Face Culling}{3}{section.4}
+\contentsline {section}{\numberline {4}Back-Face Culling}{4}{section.4}
