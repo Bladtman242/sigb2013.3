@@ -9,3 +9,4 @@
 \contentsline {subsection}{\numberline {3.2}Flat shading}{5}{subsection.3.2}
 \contentsline {subsection}{\numberline {3.3}Phong shading}{5}{subsection.3.3}
 \contentsline {subsection}{\numberline {3.4}Estimating the point of impact}{5}{subsection.3.4}
+\contentsline {section}{\numberline {4}Our findings}{10}{section.4}
