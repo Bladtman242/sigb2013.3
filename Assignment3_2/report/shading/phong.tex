@@ -9,6 +9,24 @@ intensity of the entire surface. Phong illumination corrects this problem.
 	{\includegraphics{pics/phongInterpol.png}}
 	\caption{Normal interpolation in Phong shading}
 	\label{fig:phongInterpo}
-\ref{fig:phongInterpo})
+\ref{fig:phongInterpo}
 \end{figure}
-By interpolating bilinearly \ref{fig:phongInterpo}
+
+By interpolating the vertex normals across the polygon surface (figure
+\ref{fig:phongInterpo}), Phong shading finds a smoothly shifting normal for each
+pixel. This normal is then used in the illumination/reflection model, to find
+the final intensity weight for that pixel. This will give a much more realistic
+result that flat shading, at the expense of interpolating normals and applying
+the lighting model for each surface pixel. Figure \ref{fig:fVsP} illustrates
+both the improved colour realism (the sphere actually looks spherical), and the
+difference in specularity, being completely invisible in the example using flat
+shading.
+
+\begin{figure}[htb]
+	\centering
+	\scalebox{0.7}
+	{\includegraphics{pics/flatVsPhong.png}}
+	\caption{flat vs Phong shading}
+	\label{fig:fVsP}
+\ref{fig:phongInterpo}
+\end{figure}
